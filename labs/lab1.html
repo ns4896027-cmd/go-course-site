@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа №1 - Установка Go | Курс по Go</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F7FA;
+            color: #1a2a3a;
+            line-height: 1.6;
+        }
+
+        :root {
+            --primary: #007D9C;
+            --primary-dark: #005f73;
+            --primary-light: #e6f3f6;
+            --secondary: #00ADD8;
+            --text-dark: #1a2a3a;
+            --text-light: #5a6e7c;
+            --bg-white: #FFFFFF;
+            --border: #E0E7EC;
+            --shadow: 0 5px 20px rgba(0,0,0,0.08);
+            --success: #27AE60;
+            --warning: #F39C12;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--primary);
+        }
+
+        .breadcrumbs {
+            padding-top: 100px;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lab-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .lab-header h1 {
+            font-size: 36px;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+
+        .lab-header p {
+            font-size: 18px;
+            color: var(--text-light);
+        }
+
+        .lab-info {
+            background: var(--primary-light);
+            border-radius: 16px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-item i {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .info-item span:first-of-type {
+            font-weight: 600;
+        }
+
+        .lab-content {
+            background: var(--bg-white);
+            border-radius: 24px;
+            padding: 48px;
+            box-shadow: var(--shadow);
+        }
+
+        .lab-section {
+            margin-bottom: 40px;
+        }
+
+        .lab-section h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--primary-dark);
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 8px;
+        }
+
+        .lab-section h3 {
+            font-size: 22px;
+            margin: 20px 0 12px;
+            color: var(--text-dark);
+        }
+
+        .lab-section p {
+            margin-bottom: 16px;
+            color: var(--text-light);
+        }
+
+        .goal-box {
+            background: linear-gradient(135deg, var(--primary-light) 0%, #f0f7f9 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 20px 0;
+            border-left: 4px solid var(--primary);
+        }
+
+        .goal-box h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: var(--primary-dark);
+        }
+
+        .step-box {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid var(--border);
+        }
+
+        .step-number {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+
+        pre {
+            background: #1e2a3a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            background: #f0f2f5;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: var(--primary-dark);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        .tip-box {
+            background: #fef5e7;
+            border-left: 4px solid var(--warning);
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+
+        .tip-box i {
+            color: var(--warning);
+            margin-right: 10px;
+        }
+
+        .checklist {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .checklist li {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .checklist li i {
+            color: var(--success);
+            font-size: 18px;
+        }
+
+        .result-box {
+            background: #e8f5e9;
+            border-left: 4px solid var(--success);
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+
+        .result-box i {
+            color: var(--success);
+            margin-right: 10px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .nav-btn.prev:hover {
+            transform: translateX(-5px);
+        }
+
+        .nav-btn.next:hover {
+            transform: translateX(5px);
+        }
+
+        .footer {
+            background: #1a2a3a;
+            color: white;
+            padding: 60px 0 30px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo a {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-links h4 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .footer-links a {
+            display: block;
+            color: #8a9ba8;
+            text-decoration: none;
+            margin-bottom: 12px;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #8a9ba8;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: var(--shadow);
+            }
+            .nav-links.active { display: flex; }
+            .mobile-menu-btn { display: block; }
+            .lab-header h1 { font-size: 28px; }
+            .lab-content { padding: 24px; }
+            .lab-info { flex-direction: column; text-align: center; }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">GO COURSE</a>
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a href="../index.html">Главная</a>
+                <a href="../lectures.html">📚 Лекции</a>
+                <a href="../labs.html">💻 Лабораторные</a>
+                <a href="../test.html">📝 Тест</a>
+                <a href="../resources.html">🔗 Ресурсы</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="breadcrumbs">
+            <a href="../index.html">Главная</a> → <a href="../labs.html">Лабораторные работы</a> → <span>Лабораторная работа №1</span>
+        </div>
+
+        <div class="lab-header">
+            <h1>💻 Лабораторная работа №1</h1>
+            <p>Установка Go и настройка среды разработки</p>
+        </div>
+
+        <div class="lab-info">
+            <div class="info-item">
+                <i class="fas fa-clock"></i>
+                <span>Время выполнения:</span>
+                <span>30 минут</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-signal"></i>
+                <span>Уровень сложности:</span>
+                <span>Начинающий</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-tools"></i>
+                <span>Инструменты:</span>
+                <span>Go, VS Code</span>
+            </div>
+        </div>
+
+        <div class="lab-content">
+            <!-- Цель работы -->
+            <div class="goal-box">
+                <h3><i class="fas fa-bullseye"></i> Цель работы</h3>
+                <p>Научиться устанавливать язык программирования Go и настраивать среду разработки для комфортного написания кода.</p>
+            </div>
+
+            <!-- Теоретическая часть -->
+            <div class="lab-section">
+                <h2>📖 Теоретическая часть</h2>
+                <p>Перед началом работы с Go необходимо установить компилятор и настроить среду разработки. Go — компилируемый язык, поэтому для запуска программ требуется компилятор. В этой лабораторной работе мы установим Go, настроим переменные окружения и подготовим удобную среду для разработки в VS Code.</p>
+            </div>
+
+            <!-- Ход работы -->
+            <div class="lab-section">
+                <h2>🔧 Ход работы</h2>
+
+                <h3>1. Установка Go</h3>
+                <div class="step-box">
+                    <p><span class="step-number">1</span> Перейдите на официальный сайт Go: <a href="https://go.dev/dl/" target="_blank">https://go.dev/dl/</a></p>
+                </div>
+                <div class="step-box">
+                    <p><span class="step-number">2</span> Скачайте установщик для вашей операционной системы:</p>
+                    <ul style="margin-left: 60px; margin-top: 10px;">
+                        <li><strong>Windows:</strong> .msi установщик</li>
+                        <li><strong>macOS:</strong> .pkg установщик</li>
+                        <li><strong>Linux:</strong> .tar.gz архив</li>
+                    </ul>
+                </div>
+                <div class="step-box">
+                    <p><span class="step-number">3</span> Запустите скачанный файл и следуйте инструкциям на экране.</p>
+                </div>
+                <div class="step-box">
+                    <p><span class="step-number">4</span> После установки откройте терминал (командную строку) и проверьте версию Go:</p>
+                    <pre><code>go version</code></pre>
+                    <p>Вы должны увидеть что-то вроде: <code>go version go1.22.0 windows/amd64</code></p>
+                </div>
+
+                <h3>2. Настройка переменных среды (Windows)</h3>
+                <div class="step-box">
+                    <p><span class="step-number">5</span> Создайте папку для проектов на Go, например: <code>C:\GoWorkspace</code></p>
+                </div>
+                <div class="step-box">
+                    <p><span class="step-number">6</span> Внутри созданной папки создайте две подпапки: <code>bin</code> и <code>src</code></p>
+                </div>
+                <div class="step-box">
+                    <p><span class="step-number">7</span> Откройте <strong>Панель управления</strong> → <strong>Система и безопасность</strong> → <strong>Система</strong> → <strong>Дополнительные параметры системы</strong> → <strong>Переменные среды</strong></p>
+                </div>
+                <div class="step-box">
+                    <p><span class="step-number">8</span> Нажмите <strong>Создать</strong> в разделе «Переменные среды пользователя»</p>
+                </div>
+                <div class="step-box">
+                    <p><span class="step-number">9</span> Введите:</p>
+                    <ul style="margin-left: 60px; margin-top: 10px;">
+                        <li><strong>Имя переменной:</strong> <code>GOPATH</code></li>
+                        <li><strong>Значение переменной:</strong> <code>C:\GoWorkspace</code> (путь к вашей папке)</li>
+                    </ul>
+                </div>
+                <div class="step-box">
+                    <p><span class="step-number">10</span> Найдите переменную <code>Path</code> в том же разделе, выделите её и нажмите <strong>Изменить</strong>. Убедитесь, что путь до папки <code>bin</code> Go присутствует. Обычно это <code>C:\Program Files\Go\bin</code>.</p>
+                </div>
+
+                <div class="tip-box">
+                    <i class="fas fa-lightbulb"></i> <strong>Совет:</strong> Для проверки переменных окружения выполните команду в терминале:
+                    <pre><code>go env</code></pre>
+                    <p>Если GOPATH не установлен, Go создаёт рабочий каталог по умолчанию в <code>~/go</code>.</p>
+                </div>
+
+                <h3>3. Установка VS Code и расширения</h3>
+                <div class="step-box">
+                    <p><span class="step-number">11</span> Скачайте и установите Visual Studio Code с официального сайта: <a href="https://code.visualstudio.com/" target="_blank">https://code.visualstudio.com/</a></p>
+                </div>
+                <div class="step-box">
+                    <p><span class="step-number">12</span> Откройте VS Code и перейдите в панель расширений (Ctrl+Shift+X)</p>
+                </div>
+                <div class="step-box">
+                    <p><span class="step-number">13</span> Найдите расширение <strong>Go</strong> от <strong>Go Team at Google</strong> и установите его</p>
+                </div>
+                <div class="step-box">
+                    <p><span class="step-number">14</span> После установки может появиться сообщение: <code>gopls command is not available</code>. Нажмите на появившуюся кнопку <strong>Install</strong> для установки необходимых инструментов.</p>
+                </div>
+
+                <h3>4. Настройка пути Go в VS Code</h3>
+                <div class="step-box">
+                    <p><span class="step-number">15</span> Откройте настройки VS Code (Ctrl+,), затем кликните по значку <code>{}</code> — «Open Settings (JSON)»</p>
+                </div>
+                <div class="step-box">
+                    <p><span class="step-number">16</span> Добавьте следующие строки:</p>
+                    <pre><code>{
+    "go.goroot": "C:\\Go",
+    "go.gopath": "C:\\Users\\YourName\\go"
+}</code></pre>
+                    <p><strong>Для macOS/Linux:</strong></p>
+                    <pre><code>{
+    "go.goroot": "/usr/local/go",
+    "go.gopath": "/Users/yourusername/go"
+}</code></pre>
+                    <p><em>Замените пути на ваши реальные пути.</em></p>
+                </div>
+
+                <h3>5. Проверка установки</h3>
+                <div class="step-box">
+                    <p><span class="step-number">17</span> Создайте новый файл <code>main.go</code> и напишите:</p>
+                    <pre><code>package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, Go!")
+}</code></pre>
+                </div>
+                <div class="step-box">
+                    <p><span class="step-number">18</span> Откройте терминал в VS Code (Ctrl+`)</p>
+                </div>
+                <div class="step-box">
+                    <p><span class="step-number">19</span> Выполните команду:</p>
+                    <pre><code>go run main.go</code></pre>
+                </div>
+                <div class="result-box">
+                    <i class="fas fa-check-circle"></i> <strong>Ожидаемый результат:</strong>
+                    <pre><code>Hello, Go!</code></pre>
+                </div>
+            </div>
+
+            <!-- Контрольные вопросы -->
+            <div class="lab-section">
+                <h2>❓ Контрольные вопросы</h2>
+                <div class="tip-box">
+                    <i class="fas fa-question-circle"></i> <strong>Вопрос 1:</strong> Какие переменные окружения нужно настроить для работы с Go?
+                </div>
+                <div class="tip-box">
+                    <i class="fas fa-question-circle"></i> <strong>Вопрос 2:</strong> Для чего нужна переменная GOPATH?
+                </div>
+                <div class="tip-box">
+                    <i class="fas fa-question-circle"></i> <strong>Вопрос 3:</strong> Как проверить, что Go установлен корректно?
+                </div>
+                <div class="tip-box">
+                    <i class="fas fa-question-circle"></i> <strong>Вопрос 4:</strong> Какое расширение для VS Code используется для разработки на Go?
+                </div>
+                <div class="tip-box">
+                    <i class="fas fa-question-circle"></i> <strong>Вопрос 5:</strong> Что такое gopls и для чего он нужен?
+                </div>
+            </div>
+
+            <!-- Итог -->
+            <div class="goal-box">
+                <h3><i class="fas fa-trophy"></i> Итог лабораторной работы</h3>
+                <p>После выполнения лабораторной работы студент приобретает практические навыки установки Go на операционную систему, настройки переменных окружения GOPATH и GOROOT, установки Visual Studio Code и официального расширения для Go. Студент понимает структуру рабочего пространства Go и готов к созданию первых программ.</p>
+            </div>
+
+            <!-- Навигация -->
+            <div class="nav-buttons">
+                <span style="visibility: hidden;"></span>
+                <a href="lab2.html" class="nav-btn next">Следующая работа → Базовые типы данных</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <a href="../index.html">GO COURSE</a>
+                    <p>Курс по языку программирования Go</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Навигация</h4>
+                    <a href="../lectures.html">Лекции</a>
+                    <a href="../labs.html">Лабораторные работы</a>
+                    <a href="../test.html">Итоговый тест</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Ресурсы</h4>
+                    <a href="https://go.dev/" target="_blank">Официальный сайт Go</a>
+                    <a href="https://go.dev/tour/" target="_blank">Tour of Go</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Контакты</h4>
+                    <a href="#">support@go-course.ru</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GO COURSE. Все материалы доступны для изучения.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        mobileMenuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
+    </script>
+
+</body>
+</html>

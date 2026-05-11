@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лекция 2 - Базовые типы данных | Курс по Go</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F7FA;
+            color: #1a2a3a;
+            line-height: 1.6;
+        }
+
+        :root {
+            --primary: #007D9C;
+            --primary-dark: #005f73;
+            --primary-light: #e6f3f6;
+            --secondary: #00ADD8;
+            --text-dark: #1a2a3a;
+            --text-light: #5a6e7c;
+            --text-gray: #8a9ba8;
+            --bg-white: #FFFFFF;
+            --border: #E0E7EC;
+            --shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--primary);
+        }
+
+        .breadcrumbs {
+            padding-top: 100px;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lecture-content {
+            background: var(--bg-white);
+            border-radius: 24px;
+            padding: 48px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .lecture-title {
+            font-size: 36px;
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 24px;
+            color: var(--text-dark);
+            border-left: 4px solid var(--primary);
+            padding-left: 20px;
+        }
+
+        .lecture-section {
+            margin-bottom: 40px;
+        }
+
+        .lecture-section h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--primary-dark);
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 8px;
+        }
+
+        .lecture-section h3 {
+            font-size: 22px;
+            margin: 20px 0 12px;
+            color: var(--text-dark);
+        }
+
+        .lecture-section p {
+            margin-bottom: 16px;
+            color: var(--text-light);
+        }
+
+        .info-box {
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+
+        .info-box i {
+            color: var(--primary);
+            margin-right: 10px;
+        }
+
+        .type-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .type-table th, .type-table td {
+            border: 1px solid var(--border);
+            padding: 12px;
+            text-align: left;
+        }
+
+        .type-table th {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        .type-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        pre {
+            background: #1e2a3a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            background: #f0f2f5;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: var(--primary-dark);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .nav-btn.prev:hover {
+            transform: translateX(-5px);
+        }
+
+        .nav-btn.next:hover {
+            transform: translateX(5px);
+        }
+
+        .footer {
+            background: #1a2a3a;
+            color: white;
+            padding: 60px 0 30px;
+            margin-top: 40px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo a {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-links h4 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .footer-links a {
+            display: block;
+            color: #8a9ba8;
+            text-decoration: none;
+            margin-bottom: 12px;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #8a9ba8;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: var(--shadow);
+            }
+            .nav-links.active { display: flex; }
+            .mobile-menu-btn { display: block; }
+            .lecture-content { padding: 24px; }
+            .lecture-title { font-size: 28px; }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+            .type-table { font-size: 14px; }
+            .type-table th, .type-table td { padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">GO COURSE</a>
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a href="../index.html">Главная</a>
+                <a href="../lectures.html">📚 Лекции</a>
+                <a href="../labs.html">💻 Лабораторные</a>
+                <a href="../test.html">📝 Тест</a>
+                <a href="../resources.html">🔗 Ресурсы</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="breadcrumbs">
+            <a href="../index.html">Главная</a> → <a href="../lectures.html">Лекции</a> → <span>Лекция 2</span>
+        </div>
+
+        <div class="lecture-content">
+            <h1 class="lecture-title">Лекция 2. Базовые типы данных. Переменные и константы</h1>
+
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i> <strong>Длительность лекции:</strong> 45 минут<br>
+                <i class="fas fa-code"></i> <strong>Уровень:</strong> Начинающий<br>
+                <i class="fas fa-flask"></i> <strong>Темы:</strong> Целочисленные типы, числа с плавающей точкой, строки, bool, переменные, константы, iota
+            </div>
+
+            <!-- Целочисленные типы -->
+            <div class="lecture-section">
+                <h2>🔢 Целочисленные типы</h2>
+                <p>В Go есть несколько целочисленных типов, различающихся диапазоном значений и размером в памяти:</p>
+                
+                <table class="type-table">
+                    <thead>
+                        <tr><th>Тип</th><th>Диапазон</th><th>Размер</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>int8</code></td><td>-128 до 127</td><td>1 байт</td></tr>
+                        <tr><td><code>int16</code></td><td>-32768 до 32767</td><td>2 байта</td></tr>
+                        <tr><td><code>int32</code></td><td>-2147483648 до 2147483647</td><td>4 байта</td></tr>
+                        <tr><td><code>int64</code></td><td>-9·10¹⁸ до 9·10¹⁸</td><td>8 байт</td></tr>
+                        <tr><td><code>uint8</code></td><td>0 до 255</td><td>1 байт</td></tr>
+                        <tr><td><code>uint16</code></td><td>0 до 65535</td><td>2 байта</td></tr>
+                        <tr><td><code>uint32</code></td><td>0 до 4294967295</td><td>4 байта</td></tr>
+                        <tr><td><code>uint64</code></td><td>0 до 1.8·10¹⁹</td><td>8 байт</td></tr>
+                        <tr><td><code>byte</code></td><td>синоним uint8</td><td>1 байт</td></tr>
+                        <tr><td><code>rune</code></td><td>синоним int32</td><td>4 байта</td></tr>
+                        <tr><td><code>int</code></td><td>32 или 64 бита (зависит от платформы)</td><td>4 или 8 байт</td></tr>
+                        <tr><td><code>uint</code></td><td>беззнаковый, 32 или 64 бита</td><td>4 или 8 байт</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box">
+                    <i class="fas fa-lightbulb"></i> <strong>Важно:</strong> Типы <code>int</code> и <code>uint</code> имеют размер, зависящий от платформы (32 бита на 32-разрядных системах, 64 бита на 64-разрядных).
+                </div>
+            </div>
+
+            <!-- Числа с плавающей точкой -->
+            <div class="lecture-section">
+                <h2>💧 Числа с плавающей точкой</h2>
+                <table class="type-table">
+                    <thead><tr><th>Тип</th><th>Описание</th><th>Размер</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>float32</code></td><td>~1.4·10⁻⁴⁵ до 3.4·10³⁸</td><td>4 байта</td></tr>
+                        <tr><td><code>float64</code></td><td>~4.9·10⁻³²⁴ до 1.8·10³⁰⁸</td><td>8 байт</td></tr>
+                    </tbody>
+                </table>
+                <pre><code>var f float32 = 18
+var g float32 = 4.5
+var pi float64 = 3.14</code></pre>
+            </div>
+
+            <!-- Комплексные числа -->
+            <div class="lecture-section">
+                <h2>🧮 Комплексные числа</h2>
+                <table class="type-table">
+                    <thead><tr><th>Тип</th><th>Описание</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>complex64</code></td><td>вещественная и мнимая части — float32</td></tr>
+                        <tr><td><code>complex128</code></td><td>вещественная и мнимая части — float64</td></tr>
+                    </tbody>
+                </table>
+                <pre><code>var f complex64 = 1+2i
+var g complex128 = 4+3i</code></pre>
+            </div>
+
+            <!-- Тип bool -->
+            <div class="lecture-section">
+                <h2>✅ Логический тип bool</h2>
+                <p>Может принимать одно из двух значений: <code>true</code> (истина) или <code>false</code> (ложь).</p>
+                <pre><code>var isActive bool = true
+var isFinished bool = false</code></pre>
+            </div>
+
+            <!-- Строки -->
+            <div class="lecture-section">
+                <h2>📝 Строки</h2>
+                <p>Строка — это последовательность символов, заключённая в двойные кавычки:</p>
+                <pre><code>var name string = "Hello Go"</code></pre>
+                
+                <h3>Управляющие последовательности</h3>
+                <table class="type-table">
+                    <thead><tr><th>Последовательность</th><th>Значение</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>\n</code></td><td>новая строка</td></tr>
+                        <tr><td><code>\r</code></td><td>возврат каретки</td></tr>
+                        <tr><td><code>\t</code></td><td>табуляция</td></tr>
+                        <tr><td><code>\"</code></td><td>двойная кавычка</td></tr>
+                        <tr><td><code>\\</code></td><td>обратный слеш</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Значения по умолчанию -->
+            <div class="lecture-section">
+                <h2>🎯 Значения по умолчанию (zero values)</h2>
+                <p>Если переменной не присвоено значение, она получает значение по умолчанию:</p>
+                <table class="type-table">
+                    <thead><tr><th>Тип</th><th>Значение по умолчанию</th></tr></thead>
+                    <tbody>
+                        <tr><td>Числовые типы</td><td><code>0</code></td></tr>
+                        <tr><td><code>bool</code></td><td><code>false</code></td></tr>
+                        <tr><td><code>string</code></td><td><code>""</code> (пустая строка)</td></tr>
+                    </tbody>
+                </table>
+                <pre><code>var x int          // 0
+var y float64      // 0
+var z bool         // false
+var s string       // ""</code></pre>
+
+                <div class="info-box">
+                    <i class="fas fa-info-circle"></i> <strong>Важно:</strong> В Go нет <code>null</code> или <code>undefined</code>. У каждой переменной всегда есть значение.
+                </div>
+            </div>
+
+            <!-- Объявление переменных -->
+            <div class="lecture-section">
+                <h2>📦 Объявление переменных</h2>
+                
+                <h3>Полное объявление</h3>
+                <pre><code>var name string
+name = "Tom"
+
+// Или сразу с инициализацией
+var name string = "Tom"</code></pre>
+
+                <h3>Групповое объявление</h3>
+                <pre><code>var (
+    name string = "Tom"
+    age  int    = 27
+)</code></pre>
+
+                <h3>Краткое объявление (только внутри функций)</h3>
+                <pre><code>name := "Tom"
+age := 27</code></pre>
+
+                <h3>Определение типа переменной</h3>
+                <pre><code>var x = 42           // тип int
+var y = 3.14         // тип float64
+var z = "Hello"      // тип string
+
+// Узнать тип переменной
+fmt.Printf("%T\n", x)   // int</code></pre>
+            </div>
+
+            <!-- Константы -->
+            <div class="lecture-section">
+                <h2>🔒 Константы</h2>
+                <p>Константы — это значения, которые нельзя изменить после объявления.</p>
+                <pre><code>const pi float64 = 3.1415
+const appName = "MyApp"
+
+// Групповое объявление
+const (
+    pi = 3.1415
+    e  = 2.7182
+)</code></pre>
+
+                <h3>Автоматическая инициализация констант</h3>
+                <pre><code>const (
+    a = 1
+    b      // b = 1
+    c      // c = 1
+    d = 3
+    f      // f = 3
+)
+fmt.Println(a, b, c, d, f) // 1, 1, 1, 3, 3</code></pre>
+
+                <h3>Идентификатор iota</h3>
+                <p><code>iota</code> — счётчик, который увеличивается с объявлением каждой новой константы в блоке <code>const</code>.</p>
+                <pre><code>const (
+    C0 = iota  // 0
+    C1         // 1
+    C2         // 2
+)
+fmt.Println(C0, C1, C2) // 0, 1, 2
+
+// iota сбрасывается в каждом новом блоке const
+const (
+    C3 = iota  // 0
+)</code></pre>
+            </div>
+
+            <!-- Контрольные вопросы -->
+            <div class="lecture-section">
+                <h2>❓ Контрольные вопросы</h2>
+                <div class="info-box">
+                    <i class="fas fa-question-circle"></i> <strong>Вопрос 1:</strong> Чем отличается <code>int8</code> от <code>uint8</code>?
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-question-circle"></i> <strong>Вопрос 2:</strong> Что будет выведено на экран?
+                    <pre><code>var x int
+fmt.Println(x)</code></pre>
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-question-circle"></i> <strong>Вопрос 3:</strong> В чём разница между <code>var name = "Tom"</code> и <code>name := "Tom"</code>?
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-question-circle"></i> <strong>Вопрос 4:</strong> Что такое <code>iota</code> и для чего он используется?
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-question-circle"></i> <strong>Вопрос 5:</strong> Какие значения по умолчанию имеют <code>int</code>, <code>bool</code> и <code>string</code>?
+                </div>
+            </div>
+
+            <!-- Навигация между лекциями -->
+            <div class="nav-buttons">
+                <a href="lecture1.html" class="nav-btn prev">← Назад к лекции 1</a>
+                <a href="lecture3.html" class="nav-btn next">Лекция 3 → Управляющие конструкции</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <a href="../index.html">GO COURSE</a>
+                    <p style="margin-top: 16px;">Курс по языку программирования Go</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Навигация</h4>
+                    <a href="../lectures.html">Лекции</a>
+                    <a href="../labs.html">Лабораторные работы</a>
+                    <a href="../test.html">Итоговый тест</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Ресурсы</h4>
+                    <a href="https://go.dev/" target="_blank">Официальный сайт Go</a>
+                    <a href="https://go.dev/tour/" target="_blank">Tour of Go</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Контакты</h4>
+                    <a href="#">support@go-course.ru</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GO COURSE. Все материалы доступны для изучения.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        mobileMenuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
+    </script>
+
+</body>
+</html>

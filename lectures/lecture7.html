@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лекция 7 - Обработка ошибок и работа с ресурсами | Курс по Go</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F7FA;
+            color: #1a2a3a;
+            line-height: 1.6;
+        }
+
+        :root {
+            --primary: #007D9C;
+            --primary-dark: #005f73;
+            --primary-light: #e6f3f6;
+            --secondary: #00ADD8;
+            --text-dark: #1a2a3a;
+            --text-light: #5a6e7c;
+            --text-gray: #8a9ba8;
+            --bg-white: #FFFFFF;
+            --border: #E0E7EC;
+            --shadow: 0 5px 20px rgba(0,0,0,0.08);
+            --error: #e74c3c;
+            --error-light: #fdecea;
+            --warning: #f39c12;
+            --warning-light: #fef5e7;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--primary);
+        }
+
+        .breadcrumbs {
+            padding-top: 100px;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lecture-content {
+            background: var(--bg-white);
+            border-radius: 24px;
+            padding: 48px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .lecture-title {
+            font-size: 36px;
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 24px;
+            color: var(--text-dark);
+            border-left: 4px solid var(--primary);
+            padding-left: 20px;
+        }
+
+        .lecture-section {
+            margin-bottom: 40px;
+        }
+
+        .lecture-section h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--primary-dark);
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 8px;
+        }
+
+        .lecture-section h3 {
+            font-size: 22px;
+            margin: 20px 0 12px;
+            color: var(--text-dark);
+        }
+
+        .lecture-section p {
+            margin-bottom: 16px;
+            color: var(--text-light);
+        }
+
+        .info-box {
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+
+        .info-box i {
+            color: var(--primary);
+            margin-right: 10px;
+        }
+
+        .error-box {
+            background: var(--error-light);
+            border-left: 4px solid var(--error);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+
+        .error-box i {
+            color: var(--error);
+            margin-right: 10px;
+        }
+
+        .warning-box {
+            background: var(--warning-light);
+            border-left: 4px solid var(--warning);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+
+        .warning-box i {
+            color: var(--warning);
+            margin-right: 10px;
+        }
+
+        pre {
+            background: #1e2a3a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            background: #f0f2f5;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: var(--primary-dark);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .nav-btn.prev:hover {
+            transform: translateX(-5px);
+        }
+
+        .nav-btn.next:hover {
+            transform: translateX(5px);
+        }
+
+        .footer {
+            background: #1a2a3a;
+            color: white;
+            padding: 60px 0 30px;
+            margin-top: 40px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo a {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-logo p {
+            margin-top: 16px;
+        }
+
+        .footer-links h4 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .footer-links a {
+            display: block;
+            color: #8a9ba8;
+            text-decoration: none;
+            margin-bottom: 12px;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #8a9ba8;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: var(--shadow);
+            }
+            .nav-links.active { display: flex; }
+            .mobile-menu-btn { display: block; }
+            .lecture-content { padding: 24px; }
+            .lecture-title { font-size: 28px; }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">GO COURSE</a>
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a href="../index.html">Главная</a>
+                <a href="../lectures.html">📚 Лекции</a>
+                <a href="../labs.html">💻 Лабораторные</a>
+                <a href="../test.html">📝 Тест</a>
+                <a href="../resources.html">🔗 Ресурсы</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="breadcrumbs">
+            <a href="../index.html">Главная</a> → <a href="../lectures.html">Лекции</a> → <span>Лекция 7</span>
+        </div>
+
+        <div class="lecture-content">
+            <h1 class="lecture-title">Лекция 7. Обработка ошибок и работа с ресурсами</h1>
+
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i> <strong>Длительность лекции:</strong> 50 минут<br>
+                <i class="fas fa-code"></i> <strong>Уровень:</strong> Продвинутый<br>
+                <i class="fas fa-flask"></i> <strong>Темы:</strong> Подход Go к ошибкам, создание ошибок, оборачивание ошибок, работа с файлами, пакеты io/os, пакет time
+            </div>
+
+            <!-- Подход Go к обработке ошибок -->
+            <div class="lecture-section">
+                <h2>🎯 Подход Go к обработке ошибок</h2>
+                <p>В отличие от многих языков (Java, Python, C++), в Go <strong>нет исключений (exceptions)</strong>. Вместо этого используется явный возврат ошибок как обычных значений.</p>
+
+                <div class="info-box">
+                    <i class="fas fa-quote-left"></i> <strong>Философия Go:</strong> Ошибки — это значения. Обрабатывайте их так же, как и любые другие данные.
+                </div>
+
+                <h3>Базовый паттерн обработки ошибок</h3>
+                <pre><code>result, err := someFunction()
+if err != nil {
+    // Обрабатываем ошибку
+    log.Fatal(err)
+}
+// Используем result</code></pre>
+
+                <div class="warning-box">
+                    <i class="fas fa-exclamation-triangle"></i> <strong>Важное правило:</strong> Всегда проверяйте ошибки! Никогда не игнорируйте их (например, через <code>_</code>) без веской причины.
+                </div>
+
+                <h3>Стандартный тип error</h3>
+                <pre><code>type error interface {
+    Error() string
+}</code></pre>
+                <p>Любой тип, реализующий метод <code>Error() string</code>, автоматически удовлетворяет интерфейсу <code>error</code>.</p>
+            </div>
+
+            <!-- Создание ошибок -->
+            <div class="lecture-section">
+                <h2>📝 Создание ошибок</h2>
+
+                <h3>errors.New() — простая ошибка</h3>
+                <pre><code>import "errors"
+
+func divide(a, b float64) (float64, error) {
+    if b == 0 {
+        return 0, errors.New("деление на ноль")
+    }
+    return a / b, nil
+}
+
+func main() {
+    result, err := divide(10, 0)
+    if err != nil {
+        fmt.Println("Ошибка:", err)  // Ошибка: деление на ноль
+        return
+    }
+    fmt.Println("Результат:", result)
+}</code></pre>
+
+                <h3>fmt.Errorf() — форматированная ошибка</h3>
+                <pre><code>func readFile(filename string) error {
+    if filename == "" {
+        return fmt.Errorf("имя файла не может быть пустым")
+    }
+    return nil
+}</code></pre>
+
+                <h3>Пользовательские типы ошибок</h3>
+                <pre><code>type ValidationError struct {
+    Field   string
+    Value   interface{}
+    Message string
+}
+
+func (e ValidationError) Error() string {
+    return fmt.Sprintf("ошибка валидации поля '%s' (значение %v): %s",
+        e.Field, e.Value, e.Message)
+}
+
+func validateAge(age int) error {
+    if age < 0 {
+        return ValidationError{
+            Field:   "age",
+            Value:   age,
+            Message: "возраст не может быть отрицательным",
+        }
+    }
+    if age > 150 {
+        return ValidationError{
+            Field:   "age",
+            Value:   age,
+            Message: "возраст не может превышать 150 лет",
+        }
+    }
+    return nil
+}</code></pre>
+            </div>
+
+            <!-- Оборачивание ошибок -->
+            <div class="lecture-section">
+                <h2>📦 Оборачивание ошибок (error wrapping)</h2>
+                <p>Оборачивание позволяет добавлять контекст к ошибке, сохраняя исходную информацию.</p>
+
+                <h3>Оборачивание с %w</h3>
+                <pre><code>func processFile(filename string) error {
+    data, err := os.ReadFile(filename)
+    if err != nil {
+        return fmt.Errorf("не удалось прочитать файл %s: %w", filename, err)
+    }
+    // обработка данных
+    return nil
+}</code></pre>
+
+                <h3>Проверка обёрнутой ошибки (errors.Is)</h3>
+                <pre><code>import "errors"
+
+var ErrNotFound = errors.New("not found")
+
+func findUser(id int) error {
+    return fmt.Errorf("ошибка поиска пользователя %d: %w", id, ErrNotFound)
+}
+
+func main() {
+    err := findUser(42)
+    if errors.Is(err, ErrNotFound) {
+        fmt.Println("Пользователь не найден")
+    }
+}</code></pre>
+
+                <h3>Извлечение типа ошибки (errors.As)</h3>
+                <pre><code>func handleError(err error) {
+    var valErr ValidationError
+    if errors.As(err, &valErr) {
+        fmt.Printf("Ошибка валидации поля %s: %s\n", valErr.Field, valErr.Message)
+    } else {
+        fmt.Println("Другая ошибка:", err)
+    }
+}</code></pre>
+            </div>
+
+            <!-- Defer для освобождения ресурсов -->
+            <div class="lecture-section">
+                <h2>🔧 Defer — отложенные вызовы</h2>
+                <p><code>defer</code> откладывает выполнение функции до момента возврата из объемлющей функции. Это удобно для освобождения ресурсов.</p>
+
+                <pre><code>func readFile(filename string) (string, error) {
+    file, err := os.Open(filename)
+    if err != nil {
+        return "", err
+    }
+    defer file.Close()  // файл закроется при выходе из функции
+    
+    data, err := io.ReadAll(file)
+    if err != nil {
+        return "", err
+    }
+    
+    return string(data), nil
+}</code></pre>
+
+                <div class="info-box">
+                    <i class="fas fa-lightbulb"></i> <strong>Важно:</strong> <code>defer</code> работает по принципу LIFO (последний зарегистрированный — первый выполняется).
+                </div>
+
+                <pre><code>func main() {
+    defer fmt.Println("Первый")
+    defer fmt.Println("Второй")
+    defer fmt.Println("Третий")
+    fmt.Println("Начало")
+}
+// Вывод:
+// Начало
+// Третий
+// Второй
+// Первый</code></pre>
+            </div>
+
+            <!-- Работа с файлами -->
+            <div class="lecture-section">
+                <h2>📄 Работа с файлами (пакеты os и io)</h2>
+
+                <h3>Чтение файла</h3>
+                <pre><code>import (
+    "os"
+    "io"
+)
+
+func readFileExample(filename string) error {
+    file, err := os.Open(filename)
+    if err != nil {
+        return fmt.Errorf("ошибка открытия файла: %w", err)
+    }
+    defer file.Close()
+    
+    // Чтение всего файла
+    data, err := io.ReadAll(file)
+    if err != nil {
+        return fmt.Errorf("ошибка чтения: %w", err)
+    }
+    
+    fmt.Println(string(data))
+    return nil
+}</code></pre>
+
+                <h3>Запись в файл</h3>
+                <pre><code>func writeFileExample(filename, content string) error {
+    file, err := os.Create(filename)
+    if err != nil {
+        return fmt.Errorf("ошибка создания файла: %w", err)
+    }
+    defer file.Close()
+    
+    _, err = file.WriteString(content)
+    if err != nil {
+        return fmt.Errorf("ошибка записи: %w", err)
+    }
+    
+    return nil
+}</code></pre>
+
+                <h3>Буферизированное чтение (bufio)</h3>
+                <pre><code>import "bufio"
+
+func readLines(filename string) ([]string, error) {
+    file, err := os.Open(filename)
+    if err != nil {
+        return nil, err
+    }
+    defer file.Close()
+    
+    var lines []string
+    scanner := bufio.NewScanner(file)
+    for scanner.Scan() {
+        lines = append(lines, scanner.Text())
+    }
+    
+    if err := scanner.Err(); err != nil {
+        return nil, err
+    }
+    
+    return lines, nil
+}</code></pre>
+
+                <h3>Проверка существования файла</h3>
+                <pre><code>func fileExists(filename string) bool {
+    _, err := os.Stat(filename)
+    return !os.IsNotExist(err)
+}</code></pre>
+            </div>
+
+            <!-- Время -->
+            <div class="lecture-section">
+                <h2>⏰ Работа с временем (пакет time)</h2>
+
+                <h3>Текущее время</h3>
+                <pre><code>now := time.Now()
+fmt.Println(now)                       // 2024-01-15 14:30:00 +0300 MSK
+fmt.Println(now.Year())                // 2024
+fmt.Println(now.Month())               // January
+fmt.Println(now.Day())                 // 15
+fmt.Println(now.Hour())                // 14
+fmt.Println(now.Minute())              // 30</code></pre>
+
+                <h3>Форматирование времени</h3>
+                <pre><code>// Go использует "магическую" дату: Mon Jan 2 15:04:05 MST 2006
+fmt.Println(now.Format("2006-01-02 15:04:05"))           // 2024-01-15 14:30:00
+fmt.Println(now.Format("02.01.2006"))                    // 15.01.2024
+fmt.Println(now.Format("15:04"))                         // 14:30
+fmt.Println(now.Format("Monday, January 2"))             // Monday, January 15</code></pre>
+
+                <h3>Парсинг времени из строки</h3>
+                <pre><code>layout := "2006-01-02 15:04:05"
+str := "2024-12-25 10:30:00"
+parsedTime, err := time.Parse(layout, str)
+if err != nil {
+    fmt.Println("Ошибка парсинга:", err)
+    return
+}
+fmt.Println(parsedTime)  // 2024-12-25 10:30:00 +0000 UTC</code></pre>
+
+                <h3>Таймеры и задержки</h3>
+                <pre><code>// Задержка (time.Sleep)
+time.Sleep(2 * time.Second)
+fmt.Println("Прошло 2 секунды")
+
+// Таймер
+timer := time.NewTimer(3 * time.Second)
+<-timer.C
+fmt.Println("Таймер сработал")
+
+// Таймер с остановкой
+timer2 := time.NewTimer(5 * time.Second)
+time.Sleep(2 * time.Second)
+timer2.Stop()
+fmt.Println("Таймер остановлен")
+
+// Ticker (периодическое выполнение)
+ticker := time.NewTicker(1 * time.Second)
+go func() {
+    for range ticker.C {
+        fmt.Println("Тик")
+    }
+}()
+time.Sleep(5 * time.Second)
+ticker.Stop()</code></pre>
+
+                <h3>Измерение времени выполнения</h3>
+                <pre><code>func measureTime() {
+    start := time.Now()
+    
+    // Какой-то код
+    time.Sleep(100 * time.Millisecond)
+    
+    elapsed := time.Since(start)
+    fmt.Printf("Выполнение заняло %s\n", elapsed)
+    fmt.Printf("Миллисекунды: %d\n", elapsed.Milliseconds())
+}</code></pre>
+            </div>
+
+            <!-- Практический пример -->
+            <div class="lecture-section">
+                <h2>💡 Практический пример: логгер с временными метками</h2>
+                <pre><code>type Logger struct {
+    file *os.File
+}
+
+func NewLogger(filename string) (*Logger, error) {
+    file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+    if err != nil {
+        return nil, fmt.Errorf("не удалось открыть лог-файл: %w", err)
+    }
+    
+    return &Logger{file: file}, nil
+}
+
+func (l *Logger) Log(message string) error {
+    timestamp := time.Now().Format("2006-01-02 15:04:05")
+    line := fmt.Sprintf("[%s] %s\n", timestamp, message)
+    
+    _, err := l.file.WriteString(line)
+    if err != nil {
+        return fmt.Errorf("ошибка записи в лог: %w", err)
+    }
+    return nil
+}
+
+func (l *Logger) Close() error {
+    return l.file.Close()
+}
+
+func main() {
+    logger, err := NewLogger("app.log")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer logger.Close()
+    
+    logger.Log("Приложение запущено")
+    logger.Log("Пользователь авторизован")
+    time.Sleep(2 * time.Second)
+    logger.Log("Приложение завершено")
+}</code></pre>
+            </div>
+
+            <!-- Контрольные вопросы -->
+            <div class="lecture-section">
+                <h2>❓ Контрольные вопросы</h2>
+                <div class="info-box">
+                    <i class="fas fa-question-circle"></i> <strong>Вопрос 1:</strong> Почему в Go нет исключений (exceptions) в классическом понимании?
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-question-circle"></i> <strong>Вопрос 2:</strong> Какие два основных способа создания ошибок в Go?
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-question-circle"></i> <strong>Вопрос 3:</strong> Что делает оператор <code>defer</code> и по какому принципу он работает?
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-question-circle"></i> <strong>Вопрос 4:</strong> В чём разница между <code>errors.Is</code> и <code>errors.As</code>?
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-question-circle"></i> <strong>Вопрос 5:</strong> Какой формат даты используется в Go для парсинга времени?
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-question-circle"></i> <strong>Вопрос 6:</strong> Что такое <code>time.Ticker</code> и чем он отличается от <code>time.Timer</code>?
+                </div>
+            </div>
+
+            <!-- Навигация между лекциями -->
+            <div class="nav-buttons">
+                <a href="lecture6.html" class="nav-btn prev">← Назад к лекции 6</a>
+                <a href="lecture8.html" class="nav-btn next">Лекция 8 → Конкурентность и веб-сервисы</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <a href="../index.html">GO COURSE</a>
+                    <p>Курс по языку программирования Go</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Навигация</h4>
+                    <a href="../lectures.html">Лекции</a>
+                    <a href="../labs.html">Лабораторные работы</a>
+                    <a href="../test.html">Итоговый тест</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Ресурсы</h4>
+                    <a href="https://go.dev/" target="_blank">Официальный сайт Go</a>
+                    <a href="https://go.dev/tour/" target="_blank">Tour of Go</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Контакты</h4>
+                    <a href="#">support@go-course.ru</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GO COURSE. Все материалы доступны для изучения.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        mobileMenuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
+    </script>
+
+</body>
+</html>

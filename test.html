@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Итоговый тест по Go</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e8f4f8 0%, #d4eaf1 100%);
+            color: #1a2a3a;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        :root {
+            --primary: #007D9C;
+            --primary-dark: #005f73;
+            --primary-light: #e6f3f6;
+            --secondary: #00ADD8;
+            --text-dark: #1a2a3a;
+            --text-light: #5a6e7c;
+            --bg-white: #FFFFFF;
+            --border: #E0E7EC;
+            --shadow: 0 5px 20px rgba(0,0,0,0.08);
+            --success: #27AE60;
+            --error: #E74C3C;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--primary);
+        }
+
+        .breadcrumbs {
+            padding-top: 100px;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .test-header h1 {
+            font-size: 36px;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+
+        .test-header p {
+            color: var(--text-light);
+        }
+
+        /* Стартовый экран */
+        .start-screen {
+            background: var(--bg-white);
+            border-radius: 24px;
+            padding: 48px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .start-screen h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .start-screen p {
+            color: var(--text-light);
+            margin-bottom: 30px;
+        }
+
+        .start-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: var(--text-light);
+        }
+
+        /* Карточка вопроса */
+        .question-card {
+            background: var(--bg-white);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+
+        .question-card.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .question-counter {
+            background: var(--primary-light);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--primary);
+        }
+
+        .timer {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .question-text {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+
+        .question-code {
+            background: #1e2a3a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border);
+        }
+
+        .option:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        .option.selected {
+            background: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        .option input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .option label {
+            flex: 1;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .open-answer {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.2s;
+            margin-bottom: 30px;
+        }
+
+        .open-answer:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,125,156,0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e0e7ec;
+            color: var(--text-dark);
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        /* Результат */
+        .result-card {
+            background: var(--bg-white);
+            border-radius: 24px;
+            padding: 48px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            display: none;
+        }
+
+        .result-score {
+            font-size: 72px;
+            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            margin: 20px 0;
+        }
+
+        .result-level {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .result-details {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .detail-item {
+            text-align: center;
+        }
+
+        .detail-item .number {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Подвал */
+        .footer {
+            background: #1a2a3a;
+            color: white;
+            padding: 60px 0 30px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo a {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-links h4 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .footer-links a {
+            display: block;
+            color: #8a9ba8;
+            text-decoration: none;
+            margin-bottom: 12px;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #8a9ba8;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: var(--shadow);
+            }
+            .nav-links.active { display: flex; }
+            .mobile-menu-btn { display: block; }
+            .test-header h1 { font-size: 28px; }
+            .question-card { padding: 24px; }
+            .question-text { font-size: 18px; }
+            .result-score { font-size: 48px; }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+            .nav-buttons { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">GO COURSE</a>
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html">Главная</a>
+                <a href="lectures.html">📚 Лекции</a>
+                <a href="labs.html">💻 Лабораторные</a>
+                
+                <a href="resources.html">🔗 Ресурсы</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="breadcrumbs">
+            <a href="index.html">Главная</a> → <span>Тест</span>
+        </div>
+
+        <div class="test-header">
+            <h1>📝 Итоговый тест по Go</h1>
+            <p>Проверьте свои знания. 30 вопросов. Время: 45 минут.</p>
+        </div>
+
+        <!-- Стартовый экран -->
+        <div id="startScreen" class="start-screen">
+            <h2>🚀 Добро пожаловать на тестирование!</h2>
+            <p>Тест состоит из 30 вопросов. У вас есть 45 минут. Вопросы будут показаны по одному. Удачи!</p>
+            <div class="start-stats">
+                <div class="stat">
+                    <div class="stat-number">30</div>
+                    <div class="stat-label">Вопросов</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">45</div>
+                    <div class="stat-label">Минут</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="startBtn">▶ Начать тест</button>
+        </div>
+
+        <!-- Карточка вопроса -->
+        <div id="questionCard" class="question-card">
+            <div class="progress-info">
+                <span class="question-counter" id="questionCounter">Вопрос 1 из 30</span>
+                <span class="timer" id="timer">45:00</span>
+            </div>
+            <div class="question-text" id="questionText"></div>
+            <div id="optionsContainer"></div>
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" id="prevBtn">← Назад</button>
+                <button class="btn btn-primary" id="nextBtn">Далее →</button>
+            </div>
+        </div>
+
+        <!-- Экран результатов -->
+        <div id="resultCard" class="result-card">
+            <h2>🎉 Тест завершён!</h2>
+            <div class="result-score" id="resultScore">0%</div>
+            <div class="result-level" id="resultLevel"></div>
+            <div class="result-details">
+                <div class="detail-item">
+                    <div class="number" id="correctCount">0</div>
+                    <div>Правильных ответов</div>
+                </div>
+                <div class="detail-item">
+                    <div class="number" id="totalCount">30</div>
+                    <div>Всего вопросов</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="restartBtn">🔄 Пройти тест заново</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <a href="index.html">GO COURSE</a>
+                    <p>Курс по языку программирования Go</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Навигация</h4>
+                    <a href="lectures.html">Лекции</a>
+                    <a href="labs.html">Лабораторные работы</a>
+                    <a href="test.html">Итоговый тест</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Ресурсы</h4>
+                    <a href="https://go.dev/" target="_blank">Официальный сайт Go</a>
+                    <a href="https://go.dev/tour/" target="_blank">Tour of Go</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Контакты</h4>
+                    <a href="#">support@go-course.ru</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GO COURSE. Все материалы доступны для изучения.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ========== ВОПРОСЫ ТЕСТА ==========
+        const originalQuestions = [
+            { text: "Кто является создателями языка программирования Go?", type: "choice", options: ["Джеймс Гослинг, Андерс Хейлсберг, Бьёрн Страуструп", "Роберт Гризмер, Роб Пайк, Кен Томпсон", "Брендан Эйх, Ларс Бак, Дуглас Крокфорд", "Гвидо ван Россум, Юкихиро Мацумото, Ричи Хикки"], correct: "Роберт Гризмер, Роб Пайк, Кен Томпсон" },
+            { text: "Сколько байт в памяти занимает одна горутина (goroutine) в Go?", type: "choice", options: ["Примерно 2 КБ", "Примерно 1 МБ", "Примерно 8 КБ", "Примерно 64 КБ"], correct: "Примерно 2 КБ" },
+            { text: "Какой девиз лучше всего описывает философию Go?", type: "choice", options: ["Write once, run anywhere", "Less is exponentially more", "There's more than one way to do it", "Simplicity is the ultimate sophistication"], correct: "Less is exponentially more" },
+            { text: "Какой тип данных в Go является синонимом для uint8?", type: "choice", options: ["rune", "int", "byte", "uint"], correct: "byte" },
+            { text: "Что будет значением переменной x после выполнения кода? var x int", type: "open", correct: "0" },
+            { text: "Как правильно объявить константу в Go?", type: "choice", options: ["let pi = 3.14", "const pi = 3.14", "var pi = 3.14", "define pi = 3.14"], correct: "const pi = 3.14" },
+            { text: "Что выведет следующий код?\n\n```go\na := 10\nb := 5\nif a > b {\n    fmt.Print(\"A\")\n} else {\n    fmt.Print(\"B\")\n}\n```", type: "open", correct: "A" },
+            { text: "Что выведет следующий код?\n\n```go\nx := 2\nswitch x {\ncase 1:\n    fmt.Print(\"A\")\ncase 2:\n    fmt.Print(\"B\")\n    fallthrough\ncase 3:\n    fmt.Print(\"C\")\n}\n```", type: "open", correct: "BC" },
+            { text: "Сколько раз выполнится тело цикла?\n\n```go\nfor i := 0; i < 5; i++ {\n    fmt.Println(i)\n}\n```", type: "open", correct: "5" },
+            { text: "Чему равно значение переменной sum после выполнения кода?\n\n```go\nsum := 0\nfor i := 1; i <= 5; i++ {\n    if i == 3 {\n        continue\n    }\n    sum += i\n}\n```", type: "open", correct: "12" },
+            { text: "Какой оператор используется для немедленного выхода из цикла?", type: "choice", options: ["continue", "stop", "break", "exit"], correct: "break" },
+            { text: "Какая функция в Go возвращает длину массива?", type: "open", correct: "len" },
+            { text: "Что выведет следующий код?\n\n```go\nnums := [3]int{1, 2, 3}\nnums2 := nums\nnums2[0] = 100\nfmt.Print(nums[0])\n```", type: "open", correct: "1" },
+            { text: "Чему равны длина (len) и емкость (cap) среза после выполнения?\n\n```go\ns := make([]int, 3, 5)\n```", type: "open", correct: "len 3 cap 5" },
+            { text: "Как удалить элемент с индексом i из среза s?", type: "choice", options: ["delete(s, i)", "remove(s, i)", "s = append(s[:i], s[i+1:]...)", "s = s[:i] + s[i+1:]"], correct: "s = append(s[:i], s[i+1:]...)" },
+            { text: "Что выведет следующий код?\n\n```go\nm := map[string]int{\"a\": 1, \"b\": 2}\ndelete(m, \"a\")\nfmt.Print(m[\"b\"])\n```", type: "open", correct: "2" },
+            { text: "Как проверить, существует ли ключ в карте?", type: "choice", options: ["if m[key] != nil", "if key in m", "if value, ok := m[key]; ok", "if exists(m[key])"], correct: "if value, ok := m[key]; ok" },
+            { text: "Что такое сигнатура функции в Go?", type: "choice", options: ["Имя функции", "Только типы параметров", "Имя функции, список параметров и типы возвращаемых значений", "Тело функции"], correct: "Имя функции, список параметров и типы возвращаемых значений" },
+            { text: "Как называется специальный параметр, который пишется между func и именем метода?", type: "open", correct: "receiver" },
+            { text: "Какой тип в Go может хранить значение любого типа данных?", type: "open", correct: "interface{}" },
+            { text: "Какой оператор используется для запуска горутины?", type: "open", correct: "go" },
+            { text: "Что выведет следующий код?\n\n```go\nch := make(chan int, 2)\nch <- 1\nch <- 2\nfmt.Print(<-ch, <-ch)\n```", type: "open", correct: "1 2" },
+            { text: "Какой пакет используется для синхронизации горутин (WaitGroup, Mutex)?", type: "choice", options: ["sync", "atomic", "concurrent", "runtime"], correct: "sync" },
+            { text: "Что выведет следующий код?\n\n```go\nfunc add(a, b int) int {\n    return a + b\n}\nfunc main() {\n    fmt.Print(add(5, 3))\n}\n```", type: "open", correct: "8" },
+            { text: "Какое ключевое слово используется для определения структуры (struct) в Go?", type: "open", correct: "type" },
+            { text: "Чем срез (slice) отличается от массива?", type: "choice", options: ["Фиксированный размер", "Динамический размер, передаётся по ссылке", "Не может быть nil", "Может хранить только числа"], correct: "Динамический размер, передаётся по ссылке" },
+            { text: "Какое ключевое слово используется для определения интерфейса?", type: "choice", options: ["struct", "interface", "type", "func"], correct: "interface" },
+            { text: "Что делает оператор fallthrough в switch?", type: "choice", options: ["Выходит из switch", "Переходит к следующему case", "Завершает программу", "Вызывает панику"], correct: "Переходит к следующему case" },
+            { text: "Какой пакет нужно импортировать для работы с JSON?", type: "choice", options: ["json", "encoding/json", "json/encoding", "net/json"], correct: "encoding/json" },
+            { text: "Что такое zero value в Go?", type: "choice", options: ["Значение по умолчанию для неинициализированных переменных", "Ошибка компиляции", "Специальное значение nil", "Максимальное значение типа"], correct: "Значение по умолчанию для неинициализированных переменных" }
+        ];
+
+        // Переменные состояния
+        let questions = [];
+        let userAnswers = {};
+        let currentIndex = 0;
+        let timerInterval;
+        let timeLeft = 45 * 60;
+        let testStarted = false;
+
+        // DOM элементы
+        const startScreen = document.getElementById('startScreen');
+        const questionCard = document.getElementById('questionCard');
+        const resultCard = document.getElementById('resultCard');
+        const questionCounter = document.getElementById('questionCounter');
+        const timerEl = document.getElementById('timer');
+        const questionText = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        // Функция перемешивания массива
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Инициализация теста
+        function initTest() {
+            questions = shuffleArray([...originalQuestions]);
+            userAnswers = {};
+            currentIndex = 0;
+            timeLeft = 45 * 60;
+            updateTimerDisplay();
+            renderCurrentQuestion();
+            updateButtonStates();
+            hideResult();
+            showQuestionCard();
+        }
+
+        // Рендер текущего вопроса
+        function renderCurrentQuestion() {
+            const q = questions[currentIndex];
+            questionCounter.innerText = `Вопрос ${currentIndex + 1} из ${questions.length}`;
+            
+            let text = q.text;
+            text = text.replace(/```go/g, '<div class="question-code"><pre><code class="language-go">');
+            text = text.replace(/```/g, '</code></pre></div>');
+            questionText.innerHTML = text;
+            
+            optionsContainer.innerHTML = '';
+            
+            if (q.type === 'choice') {
+                q.options.forEach(opt => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'option';
+                    const isSelected = userAnswers[currentIndex] === opt;
+                    if (isSelected) optionDiv.classList.add('selected');
+                    
+                    const inputId = `opt_${currentIndex}_${opt.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                    optionDiv.innerHTML = `
+                        <input type="radio" name="question" value="${opt.replace(/"/g, '&quot;')}" id="${inputId}" ${isSelected ? 'checked' : ''}>
+                        <label for="${inputId}">${opt}</label>
+                    `;
+                    const radio = optionDiv.querySelector('input');
+                    radio.addEventListener('change', (e) => {
+                        if (e.target.checked) {
+                            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+                            optionDiv.classList.add('selected');
+                            userAnswers[currentIndex] = opt;
+                        }
+                    });
+                    optionsContainer.appendChild(optionDiv);
+                });
+            } else {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'open-answer';
+                input.placeholder = 'Введите ответ...';
+                input.value = userAnswers[currentIndex] || '';
+                input.addEventListener('input', (e) => {
+                    userAnswers[currentIndex] = e.target.value.trim();
+                });
+                optionsContainer.appendChild(input);
+            }
+        }
+
+        // Обновление состояния кнопок
+        function updateButtonStates() {
+            if (currentIndex === 0) {
+                prevBtn.disabled = true;
+                prevBtn.style.opacity = '0.5';
+            } else {
+                prevBtn.disabled = false;
+                prevBtn.style.opacity = '1';
+            }
+            
+            if (currentIndex === questions.length - 1) {
+                nextBtn.innerText = '✅ Завершить';
+            } else {
+                nextBtn.innerText = 'Далее →';
+            }
+        }
+
+        // Переход к следующему вопросу
+        function nextQuestion() {
+            if (currentIndex < questions.length - 1) {
+                currentIndex++;
+                renderCurrentQuestion();
+                updateButtonStates();
+            } else {
+                finishTest();
+            }
+        }
+
+        // Переход к предыдущему вопросу
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderCurrentQuestion();
+                updateButtonStates();
+            }
+        }
+
+        // Завершение теста
+        function finishTest() {
+            if (timerInterval) clearInterval(timerInterval);
+            
+            let correctCount = 0;
+            questions.forEach((q, idx) => {
+                const userAnswer = userAnswers[idx];
+                if (!userAnswer) return;
+                
+                if (q.type === 'choice') {
+                    if (userAnswer === q.correct) correctCount++;
+                } else {
+                    const normalizedUser = userAnswer.toLowerCase().trim();
+                    const normalizedCorrect = q.correct.toLowerCase().trim();
+                    if (normalizedUser === normalizedCorrect || 
+                        (normalizedCorrect.includes(' ') && normalizedUser.includes(normalizedCorrect.split(' ')[0]))) {
+                        correctCount++;
+                    }
+                }
+            });
+            
+            const total = questions.length;
+            const percentage = Math.round((correctCount / total) * 100);
+            
+            let level = '';
+            if (percentage >= 90) level = '🏆 Эксперт! Вы отлично знаете Go!';
+            else if (percentage >= 75) level = '🎓 Продвинутый уровень. Хороший результат!';
+            else if (percentage >= 60) level = '📚 Средний уровень. Есть над чем поработать.';
+            else if (percentage >= 40) level = '📖 Начальный уровень. Рекомендуем повторить материал.';
+            else level = '📝 Требуется изучение. Пройдите курс заново.';
+            
+            document.getElementById('resultScore').innerText = `${percentage}%`;
+            document.getElementById('resultLevel').innerHTML = level;
+            document.getElementById('correctCount').innerText = correctCount;
+            document.getElementById('totalCount').innerText = total;
+            
+            hideQuestionCard();
+            showResult();
+        }
+
+        // Таймер
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    finishTest();
+                } else {
+                    timeLeft--;
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        }
+        
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerEl.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Управление отображением
+        function showStartScreen() { startScreen.style.display = 'block'; questionCard.style.display = 'none'; resultCard.style.display = 'none'; }
+        function showQuestionCard() { startScreen.style.display = 'none'; questionCard.style.display = 'block'; resultCard.style.display = 'none'; }
+        function showResult() { startScreen.style.display = 'none'; questionCard.style.display = 'none'; resultCard.style.display = 'block'; }
+        function hideResult() { resultCard.style.display = 'none'; }
+        function hideQuestionCard() { questionCard.style.display = 'none'; }
+        
+        // Сброс теста
+        function restartTest() {
+            if (timerInterval) clearInterval(timerInterval);
+            initTest();
+            startTimer();
+        }
+        
+        // Обработчики событий
+        document.getElementById('startBtn').addEventListener('click', () => {
+            initTest();
+            startTimer();
+        });
+        
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            restartTest();
+        });
+        
+        prevBtn.addEventListener('click', prevQuestion);
+        nextBtn.addEventListener('click', nextQuestion);
+        
+        // Мобильное меню
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
+        }
+    </script>
+</body>
+</html>

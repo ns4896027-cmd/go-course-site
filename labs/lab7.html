@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа №7 - Проект «Конкурентный веб-сервис» | Курс по Go</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F7FA;
+            color: #1a2a3a;
+            line-height: 1.6;
+        }
+
+        :root {
+            --primary: #007D9C;
+            --primary-dark: #005f73;
+            --primary-light: #e6f3f6;
+            --secondary: #00ADD8;
+            --text-dark: #1a2a3a;
+            --text-light: #5a6e7c;
+            --bg-white: #FFFFFF;
+            --border: #E0E7EC;
+            --shadow: 0 5px 20px rgba(0,0,0,0.08);
+            --success: #27AE60;
+            --warning: #F39C12;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--primary);
+        }
+
+        .breadcrumbs {
+            padding-top: 100px;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lab-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .lab-header h1 {
+            font-size: 36px;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+
+        .lab-header p {
+            font-size: 18px;
+            color: var(--text-light);
+        }
+
+        .lab-info {
+            background: var(--primary-light);
+            border-radius: 16px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-item i {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .lab-content {
+            background: var(--bg-white);
+            border-radius: 24px;
+            padding: 48px;
+            box-shadow: var(--shadow);
+        }
+
+        .lab-section {
+            margin-bottom: 40px;
+        }
+
+        .lab-section h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--primary-dark);
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 8px;
+        }
+
+        .lab-section h3 {
+            font-size: 22px;
+            margin: 20px 0 12px;
+            color: var(--text-dark);
+        }
+
+        .goal-box {
+            background: linear-gradient(135deg, var(--primary-light) 0%, #f0f7f9 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 20px 0;
+            border-left: 4px solid var(--primary);
+        }
+
+        .task-box {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid var(--border);
+        }
+
+        .task-number {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+
+        pre {
+            background: #1e2a3a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            background: #f0f2f5;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: var(--primary-dark);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        .screenshot-box {
+            background: #f0f2f5;
+            border: 2px dashed var(--primary);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .screenshot-box i {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+
+        .screenshot-box p {
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        .screenshot-box small {
+            color: var(--text-gray);
+            font-size: 12px;
+        }
+
+        .console-output {
+            background: #1e2a3a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .api-example {
+            background: #2d3e50;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .nav-btn.prev:hover {
+            transform: translateX(-5px);
+        }
+
+        .nav-btn.next:hover {
+            transform: translateX(5px);
+        }
+
+        .footer {
+            background: #1a2a3a;
+            color: white;
+            padding: 60px 0 30px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo a {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-links h4 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .footer-links a {
+            display: block;
+            color: #8a9ba8;
+            text-decoration: none;
+            margin-bottom: 12px;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #8a9ba8;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: var(--shadow);
+            }
+            .nav-links.active { display: flex; }
+            .mobile-menu-btn { display: block; }
+            .lab-header h1 { font-size: 28px; }
+            .lab-content { padding: 24px; }
+            .lab-info { flex-direction: column; text-align: center; }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">GO COURSE</a>
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a href="../index.html">Главная</a>
+                <a href="../lectures.html">📚 Лекции</a>
+                <a href="../labs.html">💻 Лабораторные</a>
+                <a href="../test.html">📝 Тест</a>
+                <a href="../resources.html">🔗 Ресурсы</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="breadcrumbs">
+            <a href="../index.html">Главная</a> → <a href="../labs.html">Лабораторные работы</a> → <span>Лабораторная работа №7</span>
+        </div>
+
+        <div class="lab-header">
+            <h1>🌐 Лабораторная работа №7</h1>
+            <p>Проект «Конкурентный веб-сервис» (URL Health Checker)</p>
+        </div>
+
+        <div class="lab-info">
+            <div class="info-item">
+                <i class="fas fa-clock"></i>
+                <span>Время выполнения:</span>
+                <span>90 минут</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-signal"></i>
+                <span>Уровень сложности:</span>
+                <span>Продвинутый</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-project-diagram"></i>
+                <span>Тип:</span>
+                <span>Проект</span>
+            </div>
+        </div>
+
+        <div class="lab-content">
+            <!-- Цель работы -->
+            <div class="goal-box">
+                <h3><i class="fas fa-bullseye"></i> Цель работы</h3>
+                <p>Изучить конкурентное программирование в Go и создать веб-сервис с использованием горутин, каналов и контекста для параллельной обработки HTTP-запросов.</p>
+            </div>
+
+            <!-- Описание проекта -->
+            <div class="lab-section">
+                <h2>📋 Описание проекта</h2>
+                <p>Вам необходимо создать веб-сервис — «Анализатор веб-страниц» (URL Health Checker), который:</p>
+                <ul>
+                    <li>Принимает список URL-адресов через HTTP-запрос</li>
+                    <li>Параллельно проверяет доступность каждого URL (делает HTTP-запрос)</li>
+                    <li>Возвращает результаты проверки (статус, время ответа, код ответа)</li>
+                    <li>Обрабатывает ошибки и таймауты</li>
+                    <li>Предоставляет эндпоинт для получения статистики</li>
+                </ul>
+            </div>
+
+            <!-- Структура проекта -->
+            <div class="lab-section">
+                <h2>📁 Структура проекта</h2>
+                <pre><code>url_checker/
+├── main.go              # главный файл с запуском сервера
+├── handlers/
+│   └── check.go         # обработчики HTTP-запросов
+├── checker/
+│   └── url_checker.go   # логика проверки URL
+├── models/
+│   └── models.go        # структуры данных
+├── go.mod               # модуль проекта
+└── README.md            # документация</code></pre>
+            </div>
+
+            <!-- Этап 1 -->
+            <div class="lab-section">
+                <h2>🔨 Этап 1. Создание структур данных</h2>
+                <div class="task-box">
+                    <p><span class="task-number">1</span> Создайте файл <code>models/models.go</code> со структурами данных:</p>
+                    <pre><code>package models
+
+import "time"
+
+// Запрос на проверку URL
+type CheckRequest struct {
+    URLs []string `json:"urls"`
+}
+
+// Результат проверки одного URL
+type URLResult struct {
+    URL        string        `json:"url"`
+    Status     string        `json:"status"`      // "OK", "ERROR", "TIMEOUT"
+    StatusCode int           `json:"status_code"`
+    Latency    time.Duration `json:"latency_ms"`
+    Error      string        `json:"error,omitempty"`
+    CheckedAt  time.Time     `json:"checked_at"`
+}
+
+// Ответ от сервера
+type CheckResponse struct {
+    RequestID  string       `json:"request_id"`
+    TotalURLs  int          `json:"total_urls"`
+    CheckedAt  time.Time    `json:"checked_at"`
+    Results    []URLResult  `json:"results"`
+    Statistics Statistics   `json:"statistics"`
+}
+
+// Статистика проверки
+type Statistics struct {
+    TotalChecked     int     `json:"total_checked"`
+    SuccessCount     int     `json:"success_count"`      // 2xx
+    ClientErrorCount int     `json:"client_error_count"` // 4xx
+    ServerErrorCount int     `json:"server_error_count"` // 5xx
+    TimeoutCount     int     `json:"timeout_count"`
+    AvgLatencyMs     float64 `json:"avg_latency_ms"`
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- Этап 2 -->
+            <div class="lab-section">
+                <h2>🔨 Этап 2. Логика проверки URL</h2>
+                <div class="task-box">
+                    <p><span class="task-number">2</span> Создайте файл <code>checker/url_checker.go</code> с логикой параллельной проверки URL:</p>
+                    <pre><code>package checker
+
+import (
+    "context"
+    "fmt"
+    "net/http"
+    "sync"
+    "time"
+    "url_checker/models"
+)
+
+type CheckerConfig struct {
+    Timeout       time.Duration
+    MaxConcurrent int
+    MaxURLs       int
+}
+
+type URLChecker struct {
+    client *http.Client
+    config CheckerConfig
+}
+
+func NewURLChecker(config CheckerConfig) *URLChecker {
+    return &URLChecker{
+        client: &http.Client{Timeout: config.Timeout},
+        config: config,
+    }
+}
+
+func (uc *URLChecker) checkSingleURL(ctx context.Context, url string) models.URLResult {
+    result := models.URLResult{
+        URL:       url,
+        CheckedAt: time.Now(),
+    }
+    start := time.Now()
+
+    req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+    if err != nil {
+        result.Status = "ERROR"
+        result.Error = fmt.Sprintf("Ошибка запроса: %v", err)
+        result.Latency = time.Since(start)
+        return result
+    }
+
+    resp, err := uc.client.Do(req)
+    result.Latency = time.Since(start)
+
+    if err != nil {
+        result.Status = "ERROR"
+        result.Error = err.Error()
+        return result
+    }
+    defer resp.Body.Close()
+
+    result.StatusCode = resp.StatusCode
+
+    switch {
+    case resp.StatusCode >= 200 && resp.StatusCode < 300:
+        result.Status = "OK"
+    case resp.StatusCode >= 400 && resp.StatusCode < 500:
+        result.Status = "CLIENT_ERROR"
+    case resp.StatusCode >= 500:
+        result.Status = "SERVER_ERROR"
+    default:
+        result.Status = "UNKNOWN"
+    }
+    return result
+}
+
+func (uc *URLChecker) CheckURLs(ctx context.Context, urls []string) ([]models.URLResult, models.Statistics) {
+    if len(urls) > uc.config.MaxURLs {
+        urls = urls[:uc.config.MaxURLs]
+    }
+
+    results := make([]models.URLResult, len(urls))
+    stats := models.Statistics{}
+
+    semaphore := make(chan struct{}, uc.config.MaxConcurrent)
+    var wg sync.WaitGroup
+    var mu sync.Mutex
+
+    for i, url := range urls {
+        wg.Add(1)
+        go func(idx int, u string) {
+            defer wg.Done()
+            select {
+            case semaphore <- struct{}{}:
+                defer func() { <-semaphore }()
+            case <-ctx.Done():
+                return
+            }
+            result := uc.checkSingleURL(ctx, u)
+            results[idx] = result
+
+            mu.Lock()
+            stats.TotalChecked++
+            switch result.Status {
+            case "OK":
+                stats.SuccessCount++
+            case "CLIENT_ERROR":
+                stats.ClientErrorCount++
+            case "SERVER_ERROR":
+                stats.ServerErrorCount++
+            case "ERROR":
+                stats.TimeoutCount++
+            }
+            stats.AvgLatencyMs = (stats.AvgLatencyMs*float64(stats.TotalChecked-1) +
+                float64(result.Latency.Milliseconds())) / float64(stats.TotalChecked)
+            mu.Unlock()
+        }(i, url)
+    }
+    wg.Wait()
+    return results, stats
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- Этап 3 -->
+            <div class="lab-section">
+                <h2>🔨 Этап 3. HTTP-обработчики</h2>
+                <div class="task-box">
+                    <p><span class="task-number">3</span> Создайте файл <code>handlers/check.go</code> с обработчиками HTTP-запросов:</p>
+                    <pre><code>package handlers
+
+import (
+    "encoding/json"
+    "fmt"
+    "net/http"
+    "time"
+    "url_checker/checker"
+    "url_checker/models"
+)
+
+type CheckHandler struct {
+    urlChecker *checker.URLChecker
+}
+
+func NewCheckHandler(c *checker.URLChecker) *CheckHandler {
+    return &CheckHandler{urlChecker: c}
+}
+
+func (h *CheckHandler) CheckURLs(w http.ResponseWriter, r *http.Request) {
+    if r.Method != http.MethodPost {
+        http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+        return
+    }
+
+    var req models.CheckRequest
+    if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+        http.Error(w, "Invalid JSON", http.StatusBadRequest)
+        return
+    }
+
+    if len(req.URLs) == 0 {
+        http.Error(w, "No URLs provided", http.StatusBadRequest)
+        return
+    }
+
+    results, stats := h.urlChecker.CheckURLs(r.Context(), req.URLs)
+
+    response := models.CheckResponse{
+        RequestID:  fmt.Sprintf("%d", time.Now().UnixNano()),
+        TotalURLs:  len(req.URLs),
+        CheckedAt:  time.Now(),
+        Results:    results,
+        Statistics: stats,
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(response)
+}
+
+func HealthCheck(w http.ResponseWriter, r *http.Request) {
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(map[string]string{
+        "status": "ok",
+        "time":   time.Now().Format(time.RFC3339),
+    })
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- Этап 4 -->
+            <div class="lab-section">
+                <h2>🔨 Этап 4. Главная программа</h2>
+                <div class="task-box">
+                    <p><span class="task-number">4</span> Создайте файл <code>main.go</code>:</p>
+                    <pre><code>package main
+
+import (
+    "context"
+    "log"
+    "net/http"
+    "os"
+    "os/signal"
+    "time"
+    "url_checker/checker"
+    "url_checker/handlers"
+)
+
+func main() {
+    config := checker.CheckerConfig{
+        Timeout:       10 * time.Second,
+        MaxConcurrent: 5,
+        MaxURLs:       20,
+    }
+
+    urlChecker := checker.NewURLChecker(config)
+    checkHandler := handlers.NewCheckHandler(urlChecker)
+
+    mux := http.NewServeMux()
+    mux.HandleFunc("/check", checkHandler.CheckURLs)
+    mux.HandleFunc("/health", handlers.HealthCheck)
+
+    server := &http.Server{
+        Addr:    ":8080",
+        Handler: mux,
+    }
+
+    go func() {
+        log.Printf("Сервер запущен на http://localhost:8080")
+        log.Println("Доступные эндпоинты:")
+        log.Println("  POST /check - проверить список URL")
+        log.Println("  GET /health - проверка здоровья")
+        if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+            log.Fatalf("Ошибка: %v", err)
+        }
+    }()
+
+    // Graceful shutdown
+    quit := make(chan os.Signal, 1)
+    signal.Notify(quit, os.Interrupt)
+    <-quit
+
+    log.Println("Завершение работы...")
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
+    if err := server.Shutdown(ctx); err != nil {
+        log.Fatalf("Ошибка остановки: %v", err)
+    }
+    log.Println("Сервер остановлен")
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- Этап 5 -->
+            <div class="lab-section">
+                <h2>🚀 Этап 5. Инициализация модуля и запуск</h2>
+                <div class="task-box">
+                    <p><span class="task-number">5</span> Создайте модуль и запустите сервер:</p>
+                    <pre><code>cd url_checker
+go mod init url_checker
+go run main.go</code></pre>
+                </div>
+            </div>
+
+            <!-- Тестирование API -->
+            <div class="lab-section">
+                <h2>📡 Тестирование API</h2>
+                <div class="api-example">
+                    <pre style="margin: 0;"><code># Проверка здоровья
+curl http://localhost:8080/health
+
+# Проверка URL
+curl -X POST http://localhost:8080/check \
+  -H "Content-Type: application/json" \
+  -d '{
+    "urls": [
+      "https://google.com",
+      "https://ya.ru",
+      "https://nonexistent-site-12345.ru"
+    ]
+  }'</code></pre>
+                </div>
+            </div>
+
+            <!-- Дополнительные задания -->
+            <div class="lab-section">
+                <h2>⭐ Дополнительные задания</h2>
+                <div class="task-box">
+                    <p><span class="task-number">+1</span> <strong>Эндпоинт статистики</strong></p>
+                    <p>Добавьте в структуру <code>URLChecker</code> накопление статистики по всем проверкам и создайте эндпоинт <code>/stats</code> для получения накопленной статистики.</p>
+                </div>
+                <div class="task-box">
+                    <p><span class="task-number">+2</span> <strong>Таймаут для всего запроса</strong></p>
+                    <p>Добавьте возможность ограничения времени выполнения всего запроса через заголовок <code>X-Request-Timeout</code> (в секундах).</p>
+                </div>
+                <div class="task-box">
+                    <p><span class="task-number">+3</span> <strong>Отмена долгих операций</strong></p>
+                    <p>Реализуйте возможность отмены долгой операции через эндпоинт <code>/cancel/{request_id}</code>. Для этого нужно генерировать уникальный ID для каждого запроса и сохранять контекст.</p>
+                </div>
+                <div class="task-box">
+                    <p><span class="task-number">+4</span> <strong>CLI-клиент</strong></p>
+                    <p>Создайте отдельную программу (CLI-клиент), которая принимает список URL через аргументы командной строки, отправляет запрос к сервису и красиво выводит результаты.</p>
+                </div>
+            </div>
+
+            <!-- Скриншот готового проекта -->
+            <div class="lab-section">
+                <h2>📸 Пример работы сервера</h2>
+                <div class="screenshot-box">
+                    <i class="fas fa-terminal"></i>
+                    <p>📸 <strong>Скриншот работы сервера</strong></p>
+                    <p>Запустите сервер и сделайте скриншот результатов выполнения запросов</p>
+                    <small>Пример ответа сервера приведён ниже</small>
+                </div>
+
+                <!-- Пример вывода -->
+                <div class="console-output">
+                    <strong>=== Запуск сервера ===</strong><br>
+                    $ go run main.go<br>
+                    2024/01/15 14:30:00 Сервер запущен на http://localhost:8080<br>
+                    2024/01/15 14:30:00 Доступные эндпоинты:<br>
+                    2024/01/15 14:30:00   POST /check - проверить список URL<br>
+                    2024/01/15 14:30:00   GET /health - проверка здоровья<br>
+                    <br>
+                    <strong>=== Проверка здоровья ===</strong><br>
+                    $ curl http://localhost:8080/health<br>
+                    {"status":"ok","time":"2024-01-15T14:30:15+03:00"}<br>
+                    <br>
+                    <strong>=== Проверка URL ===</strong><br>
+                    $ curl -X POST http://localhost:8080/check -H "Content-Type: application/json" -d '{"urls":["https://google.com","https://ya.ru"]}'<br>
+                    {<br>
+                      "request_id": "1705314615123456789",<br>
+                      "total_urls": 2,<br>
+                      "checked_at": "2024-01-15T14:30:25+03:00",<br>
+                      "results": [<br>
+                        {<br>
+                          "url": "https://google.com",<br>
+                          "status": "OK",<br>
+                          "status_code": 200,<br>
+                          "latency_ms": 150000000,<br>
+                          "checked_at": "2024-01-15T14:30:25+03:00"<br>
+                        },<br>
+                        {<br>
+                          "url": "https://ya.ru",<br>
+                          "status": "OK",<br>
+                          "status_code": 200,<br>
+                          "latency_ms": 120000000,<br>
+                          "checked_at": "2024-01-15T14:30:25+03:00"<br>
+                        }<br>
+                      ],<br>
+                      "statistics": {<br>
+                        "total_checked": 2,<br>
+                        "success_count": 2,<br>
+                        "client_error_count": 0,<br>
+                        "server_error_count": 0,<br>
+                        "timeout_count": 0,<br>
+                        "avg_latency_ms": 135<br>
+                      }<br>
+                    }
+                </div>
+            </div>
+
+            <!-- Итог -->
+            <div class="goal-box">
+                <h3><i class="fas fa-trophy"></i> Итог лабораторной работы</h3>
+                <p>После выполнения лабораторной работы студент понимает разницу между конкурентностью и параллелизмом, умеет запускать горутины с помощью ключевого слова go. Студент освоил каналы как основной механизм общения между горутинами, знает разницу между буферизированными и небуферизированными каналами, умеет использовать оператор select для ожидания нескольких каналов одновременно. Студент владеет приёмами синхронизации горутин с помощью WaitGroup и мьютексов, понимает проблему состояния гонки и умеет ограничивать количество параллельно выполняемых операций с помощью семафоров. Студент изучил пакет context для управления отменой операций и установки таймаутов. В рамках проекта студент создал полноценный REST API на стандартной библиотеке net/http, реализовал параллельную проверку доступности URL с заданными ограничениями, организовал graceful shutdown сервера для корректного завершения работы. Студент умеет работать с JSON (маршалинг и анмаршалинг), создавать middleware-обработчики, структурировать проект на пакеты. В результате студент готов разрабатывать конкурентные веб-сервисы на Go с эффективным использованием ресурсов и высокой производительностью.</p>
+            </div>
+
+            <!-- Навигация -->
+            <div class="nav-buttons">
+                <a href="lab6.html" class="nav-btn prev">← Лабораторная работа №6</a>
+                <span style="visibility: hidden;"></span>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <a href="../index.html">GO COURSE</a>
+                    <p>Курс по языку программирования Go</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Навигация</h4>
+                    <a href="../lectures.html">Лекции</a>
+                    <a href="../labs.html">Лабораторные работы</a>
+                    <a href="../test.html">Итоговый тест</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Ресурсы</h4>
+                    <a href="https://go.dev/" target="_blank">Официальный сайт Go</a>
+                    <a href="https://go.dev/tour/" target="_blank">Tour of Go</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Контакты</h4>
+                    <a href="#">support@go-course.ru</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GO COURSE. Все материалы доступны для изучения.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        mobileMenuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
+    </script>
+
+</body>
+</html>

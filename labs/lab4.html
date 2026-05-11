@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа №4 - Массивы, срезы и коллекции | Курс по Go</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F7FA;
+            color: #1a2a3a;
+            line-height: 1.6;
+        }
+
+        :root {
+            --primary: #007D9C;
+            --primary-dark: #005f73;
+            --primary-light: #e6f3f6;
+            --secondary: #00ADD8;
+            --text-dark: #1a2a3a;
+            --text-light: #5a6e7c;
+            --bg-white: #FFFFFF;
+            --border: #E0E7EC;
+            --shadow: 0 5px 20px rgba(0,0,0,0.08);
+            --success: #27AE60;
+            --warning: #F39C12;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--primary);
+        }
+
+        .breadcrumbs {
+            padding-top: 100px;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lab-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .lab-header h1 {
+            font-size: 36px;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+
+        .lab-header p {
+            font-size: 18px;
+            color: var(--text-light);
+        }
+
+        .lab-info {
+            background: var(--primary-light);
+            border-radius: 16px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-item i {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .lab-content {
+            background: var(--bg-white);
+            border-radius: 24px;
+            padding: 48px;
+            box-shadow: var(--shadow);
+        }
+
+        .lab-section {
+            margin-bottom: 40px;
+        }
+
+        .lab-section h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--primary-dark);
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 8px;
+        }
+
+        .goal-box {
+            background: linear-gradient(135deg, var(--primary-light) 0%, #f0f7f9 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 20px 0;
+            border-left: 4px solid var(--primary);
+        }
+
+        .task-box {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid var(--border);
+        }
+
+        .task-number {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+
+        pre {
+            background: #1e2a3a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            background: #f0f2f5;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: var(--primary-dark);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        .tip-box {
+            background: #fef5e7;
+            border-left: 4px solid var(--warning);
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+
+        .result-box {
+            background: #e8f5e9;
+            border-left: 4px solid var(--success);
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .nav-btn.prev:hover {
+            transform: translateX(-5px);
+        }
+
+        .nav-btn.next:hover {
+            transform: translateX(5px);
+        }
+
+        .footer {
+            background: #1a2a3a;
+            color: white;
+            padding: 60px 0 30px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo a {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-links h4 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .footer-links a {
+            display: block;
+            color: #8a9ba8;
+            text-decoration: none;
+            margin-bottom: 12px;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #8a9ba8;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: var(--shadow);
+            }
+            .nav-links.active { display: flex; }
+            .mobile-menu-btn { display: block; }
+            .lab-header h1 { font-size: 28px; }
+            .lab-content { padding: 24px; }
+            .lab-info { flex-direction: column; text-align: center; }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">GO COURSE</a>
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a href="../index.html">Главная</a>
+                <a href="../lectures.html">📚 Лекции</a>
+                <a href="../labs.html">💻 Лабораторные</a>
+                <a href="../test.html">📝 Тест</a>
+                <a href="../resources.html">🔗 Ресурсы</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="breadcrumbs">
+            <a href="../index.html">Главная</a> → <a href="../labs.html">Лабораторные работы</a> → <span>Лабораторная работа №4</span>
+        </div>
+
+        <div class="lab-header">
+            <h1>📊 Лабораторная работа №4</h1>
+            <p>Массивы, срезы (slices) и многомерные массивы</p>
+        </div>
+
+        <div class="lab-info">
+            <div class="info-item">
+                <i class="fas fa-clock"></i>
+                <span>Время выполнения:</span>
+                <span>75 минут</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-signal"></i>
+                <span>Уровень сложности:</span>
+                <span>Средний</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-tasks"></i>
+                <span>Количество заданий:</span>
+                <span>15</span>
+            </div>
+        </div>
+
+        <div class="lab-content">
+            <!-- Цель работы -->
+            <div class="goal-box">
+                <h3><i class="fas fa-bullseye"></i> Цель работы</h3>
+                <p>Изучить коллекции в Go: массивы и срезы (slices), освоить операции добавления, удаления, копирования и перебора элементов, а также работу с многомерными массивами.</p>
+            </div>
+
+            <!-- Задание 1 -->
+            <div class="lab-section">
+                <h2>📝 Задание 1. Объявление и инициализация массива</h2>
+                <div class="task-box">
+                    <p><span class="task-number">1</span> Создайте массив целых чисел размером 5. Заполните его значениями от 1 до 5 двумя способами:</p>
+                    <ul>
+                        <li>При объявлении (литерал массива)</li>
+                        <li>Поэлементно (через индексы после объявления)</li>
+                    </ul>
+                    <p>Выведите массив на экран.</p>
+                </div>
+
+                <!-- Задание 2 -->
+                <h2>📝 Задание 2. Перебор массива и поиск</h2>
+                <div class="task-box">
+                    <p><span class="task-number">2</span> Дан массив: <code>numbers := [8]int{15, 8, 42, 23, 4, 16, 9, 31}</code></p>
+                    <p>Напишите программу, которая:</p>
+                    <ol>
+                        <li>Находит и выводит максимальный элемент массива</li>
+                        <li>Находит и выводит минимальный элемент массива</li>
+                        <li>Находит и выводит сумму всех элементов</li>
+                    </ol>
+                </div>
+
+                <!-- Задание 3 -->
+                <h2>📝 Задание 3. Поиск индекса элемента</h2>
+                <div class="task-box">
+                    <p><span class="task-number">3</span> Дан массив: <code>colors := [6]string{"красный", "синий", "зеленый", "желтый", "фиолетовый", "оранжевый"}</code></p>
+                    <p>Напишите программу, которая запрашивает у пользователя цвет и выводит его индекс в массиве. Если цвет не найден, выведите сообщение "Цвет не найден".</p>
+                </div>
+
+                <!-- Задание 4 -->
+                <h2>📝 Задание 4. Создание срезов разными способами</h2>
+                <div class="task-box">
+                    <p><span class="task-number">4</span> Создайте срезы следующими способами и выведите их:</p>
+                    <ol>
+                        <li>Пустой срез (nil-срез)</li>
+                        <li>Срез, созданный через литерал: <code>[]int{10, 20, 30}</code></li>
+                        <li>Срез, созданный через функцию <code>make</code> с длиной 3 и емкостью 5</li>
+                        <li>Срез, созданный из массива: <code>arr := [5]int{1, 2, 3, 4, 5}</code> — возьмите элементы с 1 по 4 (индексы 1:4)</li>
+                    </ol>
+                    <p>Выведите для каждого среза: значение, длину и емкость.</p>
+                </div>
+
+                <!-- Задание 5 -->
+                <h2>📝 Задание 5. Удаление элемента из среза</h2>
+                <div class="task-box">
+                    <p><span class="task-number">5</span> Напишите функцию <code>removeElement(slice []int, index int) []int</code>, которая удаляет элемент по указанному индексу и возвращает новый срез.</p>
+                    <p>Продемонстрируйте работу функции:</p>
+                    <ol>
+                        <li>Исходный срез: <code>[1, 2, 3, 4, 5, 6]</code></li>
+                        <li>Удалите элемент с индексом 2</li>
+                        <li>Удалите элемент с индексом 0</li>
+                        <li>Удалите последний элемент</li>
+                    </ol>
+                </div>
+
+                <!-- Задание 6 -->
+                <h2>📝 Задание 6. Фильтрация среза</h2>
+                <div class="task-box">
+                    <p><span class="task-number">6</span> Напишите функцию <code>filterEven(numbers []int) []int</code>, которая принимает срез целых чисел и возвращает новый срез, содержащий только четные числа.</p>
+                    <p><strong>Исходные данные:</strong> <code>nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}</code></p>
+                    <p><strong>Ожидаемый результат:</strong> <code>[2, 4, 6, 8, 10]</code></p>
+                </div>
+
+                <!-- Задание 7 -->
+                <h2>📝 Задание 7. Объединение срезов</h2>
+                <div class="task-box">
+                    <p><span class="task-number">7</span> Напишите функцию <code>mergeSlices(slice1, slice2 []int) []int</code>, которая объединяет два среза в один.</p>
+                    <p><strong>Исходные данные:</strong> <code>a := []int{1, 2, 3}</code>, <code>b := []int{4, 5, 6}</code></p>
+                    <p><strong>Ожидаемый результат:</strong> <code>[1, 2, 3, 4, 5, 6]</code></p>
+                </div>
+
+                <!-- Задание 8 -->
+                <h2>📝 Задание 8. Разворот среза</h2>
+                <div class="task-box">
+                    <p><span class="task-number">8</span> Напишите функцию <code>reverseSlice(slice []int) []int</code>, которая возвращает новый срез с элементами в обратном порядке.</p>
+                    <p><strong>Исходные данные:</strong> <code>[]int{1, 2, 3, 4, 5}</code></p>
+                    <p><strong>Ожидаемый результат:</strong> <code>[5, 4, 3, 2, 1]</code></p>
+                </div>
+
+                <!-- Задание 9 -->
+                <h2>📝 Задание 9. Анализ оценок студентов</h2>
+                <div class="task-box">
+                    <p><span class="task-number">9</span> Дан срез оценок студентов: <code>grades := []int{85, 92, 78, 90, 88, 76, 95, 89, 84, 91}</code></p>
+                    <p>Напишите программу, которая вычисляет и выводит:</p>
+                    <ol>
+                        <li>Средний балл</li>
+                        <li>Максимальную оценку</li>
+                        <li>Минимальную оценку</li>
+                        <li>Количество оценок выше среднего</li>
+                        <li>Количество оценок ниже среднего</li>
+                    </ol>
+                </div>
+
+                <!-- Задание 10 -->
+                <h2>📝 Задание 10. Удаление дубликатов</h2>
+                <div class="task-box">
+                    <p><span class="task-number">10</span> Напишите функцию <code>removeDuplicates(input []int) []int</code>, которая удаляет дубликаты из среза. Порядок элементов должен сохраниться.</p>
+                    <p><strong>Исходные данные:</strong> <code>[]int{1, 2, 2, 3, 4, 4, 4, 5, 6, 6, 7}</code></p>
+                    <p><strong>Ожидаемый результат:</strong> <code>[1, 2, 3, 4, 5, 6, 7]</code></p>
+                </div>
+
+                <!-- Задание 11 -->
+                <h2>📝 Задание 11. Поворот матрицы на 90 градусов</h2>
+                <div class="task-box">
+                    <p><span class="task-number">11</span> Дан двумерный массив 3×3. Напишите программу, которая поворачивает матрицу на 90 градусов по часовой стрелке.</p>
+                    <p><strong>Исходная матрица:</strong></p>
+                    <pre><code>1 2 3
+4 5 6
+7 8 9</code></pre>
+                    <p><strong>Результат:</strong></p>
+                    <pre><code>7 4 1
+8 5 2
+9 6 3</code></pre>
+                </div>
+
+                <!-- Задание 12 -->
+                <h2>📝 Задание 12. Простые числа</h2>
+                <div class="task-box">
+                    <p><span class="task-number">12</span> Напишите функцию <code>isPrime(n int) bool</code>, которая проверяет, является ли число простым. В функции main выведите все простые числа от 1 до 100.</p>
+                </div>
+
+                <!-- Задание 13 -->
+                <h2>📝 Задание 13. Функция, возвращающая несколько значений</h2>
+                <div class="task-box">
+                    <p><span class="task-number">13</span> Напишите функцию <code>minMax(numbers []int) (min, max int)</code>, которая принимает срез целых чисел и возвращает минимальное и максимальное значение.</p>
+                    <p>Проверьте на массиве: <code>[15, 8, 42, 23, 4, 16, 9, 31]</code></p>
+                </div>
+
+                <!-- Задание 14 -->
+                <h2>📝 Задание 14. Вложенные циклы (звездочки)</h2>
+                <div class="task-box">
+                    <p><span class="task-number">14</span> Напишите программу, которая выводит следующие фигуры для n = 5:</p>
+                    <p><strong>Фигура 1 (треугольник):</strong></p>
+                    <pre><code>*
+**
+***
+****
+*****</code></pre>
+                    <p><strong>Фигура 2 (перевернутый треугольник):</strong></p>
+                    <pre><code>*****
+****
+***
+**
+*</code></pre>
+                    <p><strong>Фигура 3 (ромб):</strong></p>
+                    <pre><code>  *
+ ***
+*****
+ ***
+  *</code></pre>
+                </div>
+
+                <!-- Задание 15 -->
+                <h2>📝 Задание 15. Числовой палиндром</h2>
+                <div class="task-box">
+                    <p><span class="task-number">15</span> Напишите функцию <code>isPalindrome(n int) bool</code>, которая проверяет, является ли число палиндромом (читается одинаково слева направо и справа налево).</p>
+                    <p><strong>Примеры:</strong> 121 → true, 123 → false, 4554 → true</p>
+                    <p>Проверьте числа: 121, 123, 4554, 12321, 12345</p>
+                </div>
+            </div>
+
+            <!-- Итог -->
+            <div class="goal-box">
+                <h3><i class="fas fa-trophy"></i> Итог лабораторной работы</h3>
+                <p>После выполнения лабораторной работы студент понимает ключевое отличие массивов (фиксированный размер, передача по значению) от срезов (динамический размер, передача по ссылке). Студент умеет создавать срезы разными способами: через литерал, через функцию make, из массива или другого среза. Студент владеет операцией добавления элементов (append), удалением элементов из середины среза, копированием срезов с помощью функции copy. Студент понимает понятие ёмкости среза и механизм её увеличения. Также студент умеет создавать и обрабатывать многомерные массивы, выполнять их транспонирование и поворот.</p>
+            </div>
+
+            <!-- Навигация -->
+            <div class="nav-buttons">
+                <a href="lab3.html" class="nav-btn prev">← Лабораторная работа №3</a>
+                <a href="lab5.html" class="nav-btn next">Лабораторная работа №5 →</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <a href="../index.html">GO COURSE</a>
+                    <p>Курс по языку программирования Go</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Навигация</h4>
+                    <a href="../lectures.html">Лекции</a>
+                    <a href="../labs.html">Лабораторные работы</a>
+                    <a href="../test.html">Итоговый тест</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Ресурсы</h4>
+                    <a href="https://go.dev/" target="_blank">Официальный сайт Go</a>
+                    <a href="https://go.dev/tour/" target="_blank">Tour of Go</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Контакты</h4>
+                    <a href="#">support@go-course.ru</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GO COURSE. Все материалы доступны для изучения.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        mobileMenuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
+    </script>
+
+</body>
+</html>

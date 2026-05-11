@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лекция 6 - Методы и интерфейсы | Курс по Go</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F7FA;
+            color: #1a2a3a;
+            line-height: 1.6;
+        }
+
+        :root {
+            --primary: #007D9C;
+            --primary-dark: #005f73;
+            --primary-light: #e6f3f6;
+            --secondary: #00ADD8;
+            --text-dark: #1a2a3a;
+            --text-light: #5a6e7c;
+            --bg-white: #FFFFFF;
+            --border: #E0E7EC;
+            --shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--primary);
+        }
+
+        .breadcrumbs {
+            padding-top: 100px;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lecture-content {
+            background: var(--bg-white);
+            border-radius: 24px;
+            padding: 48px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .lecture-title {
+            font-size: 36px;
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 24px;
+            color: var(--text-dark);
+            border-left: 4px solid var(--primary);
+            padding-left: 20px;
+        }
+
+        .lecture-section {
+            margin-bottom: 40px;
+        }
+
+        .lecture-section h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--primary-dark);
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 8px;
+        }
+
+        .lecture-section h3 {
+            font-size: 22px;
+            margin: 20px 0 12px;
+            color: var(--text-dark);
+        }
+
+        .lecture-section p {
+            margin-bottom: 16px;
+            color: var(--text-light);
+        }
+
+        .info-box {
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+
+        .info-box i {
+            color: var(--primary);
+            margin-right: 10px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .comparison-table th, .comparison-table td {
+            border: 1px solid var(--border);
+            padding: 12px;
+            text-align: left;
+        }
+
+        .comparison-table th {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        pre {
+            background: #1e2a3a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            background: #f0f2f5;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: var(--primary-dark);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .nav-btn.prev:hover {
+            transform: translateX(-5px);
+        }
+
+        .nav-btn.next:hover {
+            transform: translateX(5px);
+        }
+
+        .footer {
+            background: #1a2a3a;
+            color: white;
+            padding: 60px 0 30px;
+            margin-top: 40px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo a {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-logo p {
+            margin-top: 16px;
+        }
+
+        .footer-links h4 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .footer-links a {
+            display: block;
+            color: #8a9ba8;
+            text-decoration: none;
+            margin-bottom: 12px;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #8a9ba8;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: var(--shadow);
+            }
+            .nav-links.active { display: flex; }
+            .mobile-menu-btn { display: block; }
+            .lecture-content { padding: 24px; }
+            .lecture-title { font-size: 28px; }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+            .comparison-table { font-size: 14px; }
+            .comparison-table th, .comparison-table td { padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">GO COURSE</a>
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a href="../index.html">Главная</a>
+                <a href="../lectures.html">📚 Лекции</a>
+                <a href="../labs.html">💻 Лабораторные</a>
+                <a href="../test.html">📝 Тест</a>
+                <a href="../resources.html">🔗 Ресурсы</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="breadcrumbs">
+            <a href="../index.html">Главная</a> → <a href="../lectures.html">Лекции</a> → <span>Лекция 6</span>
+        </div>
+
+        <div class="lecture-content">
+            <h1 class="lecture-title">Лекция 6. Методы и интерфейсы</h1>
+
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i> <strong>Длительность лекции:</strong> 60 минут<br>
+                <i class="fas fa-code"></i> <strong>Уровень:</strong> Продвинутый<br>
+                <i class="fas fa-flask"></i> <strong>Темы:</strong> Методы, интерфейсы, пустой интерфейс, встраивание интерфейсов
+            </div>
+
+            <!-- Методы -->
+            <div class="lecture-section">
+                <h2>📌 Методы в Go</h2>
+                <p>Вместо классов, как в классических ООП-языках, в Go используются <strong>методы</strong>. Метод — это функция, связанная с определённым типом (обычно со структурой).</p>
+
+                <h3>Сигнатура метода</h3>
+                <pre><code>func (название_параметра тип_получателя) название_метода(параметры) (типы_возвращаемых_значений) {
+    // тело метода
+}</code></pre>
+
+                <h3>Пример метода для структуры</h3>
+                <pre><code>type Person struct {
+    Name string
+    Age  int
+}
+
+// Метод с получателем-значением
+func (p Person) Greet() string {
+    return "Привет, меня зовут " + p.Name
+}
+
+// Метод с получателем-указателем (может изменять структуру)
+func (p *Person) Birthday() {
+    p.Age++
+}
+
+func main() {
+    person := Person{Name: "Анна", Age: 25}
+    fmt.Println(person.Greet())  // Привет, меня зовут Анна
+    person.Birthday()
+    fmt.Println(person.Age)  // 26
+}</code></pre>
+
+                <h3>Методы для пользовательских типов</h3>
+                <p>В Go можно создавать методы не только для структур, но и для любых пользовательских типов.</p>
+                <pre><code>// Новый тип на основе int
+type MyInt int
+
+func (m MyInt) IsPositive() bool {
+    return m > 0
+}
+
+func (m MyInt) Double() MyInt {
+    return m * 2
+}
+
+// Новый тип на основе среза строк
+type StringSlice []string
+
+func (ss StringSlice) Join(separator string) string {
+    result := ""
+    for i, s := range ss {
+        if i > 0 {
+            result += separator
+        }
+        result += s
+    }
+    return result
+}
+
+func main() {
+    var num MyInt = 42
+    fmt.Println(num.IsPositive())  // true
+    fmt.Println(num.Double())      // 84
+
+    fruits := StringSlice{"яблоко", "груша", "банан"}
+    fmt.Println(fruits.Join(", "))  // яблоко, груша, банан
+}</code></pre>
+
+                <div class="info-box">
+                    <i class="fas fa-exclamation-triangle"></i> <strong>Важное ограничение:</strong> Нельзя определять методы для встроенных типов напрямую. Только через создание нового типа.
+                </div>
+
+                <h3>Получатель-значение vs Получатель-указатель</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr><th>Характеристика</th><th>Получатель-значение <code>(p Person)</code></th><th>Получатель-указатель <code>(p *Person)</code></th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Изменение полей</td><td>❌ Не изменяет оригинал</td><td>✅ Изменяет оригинал</td></tr>
+                        <tr><td>Копирование</td><td>Копирует всю структуру</td><td>Копирует только указатель (быстрее)</td></tr>
+                        <tr><td>Вызов для nil</td><td>Безопасно</td><td>Нужна проверка на nil</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box">
+                    <i class="fas fa-lightbulb"></i> <strong>Правило выбора:</strong> Используйте получатель-указатель, если метод <strong>изменяет</strong> структуру или структура <strong>большая</strong>. В остальных случаях можно использовать получатель-значение.
+                </div>
+
+                <h3>Правила видимости</h3>
+                <ul style="margin-left: 24px; margin-bottom: 16px;">
+                    <li><strong>Маленькая буква</strong> — метод доступен только внутри пакета</li>
+                    <li><strong>Большая буква</strong> — метод экспортируется (доступен из других пакетов)</li>
+                </ul>
+            </div>
+
+            <!-- Интерфейсы -->
+            <div class="lecture-section">
+                <h2>🔌 Интерфейсы</h2>
+                <p><strong>Интерфейс</strong> — это тип, который определяет набор методов. Любой другой тип, который реализует все эти методы, автоматически удовлетворяет интерфейсу.</p>
+
+                <div class="info-box">
+                    <i class="fas fa-star"></i> <strong>Ключевая особенность Go:</strong> Реализация интерфейса происходит <strong>неявно</strong> (duck typing). Не нужно писать <code>implements</code> или <code>extends</code>.
+                </div>
+
+                <h3>Пример реализации интерфейса</h3>
+                <pre><code>// Определяем интерфейс Speaker
+type Speaker interface {
+    Speak() string
+}
+
+// Структура Dog
+type Dog struct {
+    Name string
+}
+
+// Dog реализует Speak — значит Dog реализует интерфейс Speaker
+func (d Dog) Speak() string {
+    return "Гав! Меня зовут " + d.Name
+}
+
+// Структура Cat
+type Cat struct {
+    Name string
+}
+
+// Cat реализует Speak — значит Cat тоже реализует Speaker
+func (c Cat) Speak() string {
+    return "Мяу! Я " + c.Name
+}
+
+// Функция, которая работает с любым Speaker
+func makeSound(s Speaker) {
+    fmt.Println(s.Speak())
+}
+
+func main() {
+    dog := Dog{Name: "Шарик"}
+    cat := Cat{Name: "Мурка"}
+    
+    makeSound(dog)  // Гав! Меня зовут Шарик
+    makeSound(cat)  // Мяу! Я Мурка
+}</code></pre>
+
+                <h3>Интерфейсы как контракты</h3>
+                <p>Интерфейсы позволяют писать гибкий и переиспользуемый код. Функция принимает интерфейс, а не конкретный тип.</p>
+
+                <h3>Пример: система оплаты</h3>
+                <pre><code>// Интерфейс PaymentMethod
+type PaymentMethod interface {
+    Pay(amount float64) string
+}
+
+// Банковская карта
+type CreditCard struct {
+    Number string
+    Holder string
+}
+
+func (c CreditCard) Pay(amount float64) string {
+    return fmt.Sprintf("Оплачено %.2f руб. картой %s", amount, c.Number)
+}
+
+// Наличные
+type Cash struct{}
+
+func (c Cash) Pay(amount float64) string {
+    return fmt.Sprintf("Оплачено %.2f руб. наличными", amount)
+}
+
+// PayPal
+type PayPal struct {
+    Email string
+}
+
+func (p PayPal) Pay(amount float64) string {
+    return fmt.Sprintf("Оплачено %.2f руб. через PayPal (%s)", amount, p.Email)
+}
+
+// Универсальная функция оплаты
+func processPayment(p PaymentMethod, amount float64) {
+    fmt.Println(p.Pay(amount))
+}
+
+func main() {
+    card := CreditCard{Number: "1234-5678", Holder: "Иван"}
+    cash := Cash{}
+    paypal := PayPal{Email: "ivan@example.com"}
+    
+    processPayment(card, 1000)
+    processPayment(cash, 500)
+    processPayment(paypal, 750)
+}</code></pre>
+            </div>
+
+            <!-- Пустой интерфейс -->
+            <div class="lecture-section">
+                <h2>📦 Пустой интерфейс interface{} (any)</h2>
+                <p>Пустой интерфейс не определяет ни одного метода. Это означает, что <strong>любой тип</strong> удовлетворяет пустому интерфейсу.</p>
+                
+                <pre><code>var anything interface{}  // может хранить значение любого типа
+anything = 42
+anything = "hello"
+anything = Dog{Name: "Шарик"}
+anything = []int{1, 2, 3}</code></pre>
+
+                <h3>Утверждение типа (Type Assertion)</h3>
+                <p>Позволяет извлечь конкретное значение из интерфейса.</p>
+                <pre><code>func describe(i any) {
+    // Безопасное утверждение типа
+    if s, ok := i.(string); ok {
+        fmt.Printf("Это строка: %q\n", s)
+    } else if n, ok := i.(int); ok {
+        fmt.Printf("Это число: %d\n", n)
+    } else {
+        fmt.Printf("Неизвестный тип: %T\n", i)
+    }
+}</code></pre>
+
+                <h3>Type Switch</h3>
+                <pre><code>func getType(i any) {
+    switch v := i.(type) {
+    case string:
+        fmt.Printf("Строка длины %d\n", len(v))
+    case int:
+        fmt.Printf("Целое число: %d\n", v)
+    case bool:
+        fmt.Printf("Логическое значение: %t\n", v)
+    default:
+        fmt.Printf("Неизвестный тип: %T\n", v)
+    }
+}</code></pre>
+
+                <div class="info-box">
+                    <i class="fas fa-lightbulb"></i> <strong>Совет:</strong> В Go 1.18+ появился псевдоним <code>any</code> для <code>interface{}</code>. Используйте <code>any</code> в современном коде.
+                </div>
+            </div>
+
+            <!-- Встраивание интерфейсов -->
+            <div class="lecture-section">
+                <h2>🔄 Встраивание интерфейсов</h2>
+                <p>Go позволяет создавать композитные интерфейсы путём встраивания других интерфейсов. Это похоже на композицию в ООП.</p>
+
+                <pre><code>// Базовые интерфейсы
+type Reader interface {
+    Read(p []byte) (n int, err error)
+}
+
+type Writer interface {
+    Write(p []byte) (n int, err error)
+}
+
+type Closer interface {
+    Close() error
+}
+
+// Встраивание интерфейсов
+type ReadWriter interface {
+    Reader   // встраиваем Reader
+    Writer   // встраиваем Writer
+}
+
+type ReadWriteCloser interface {
+    Reader
+    Writer
+    Closer
+}</code></pre>
+
+                <h3>Пример с геометрическими фигурами</h3>
+                <pre><code>type Shape interface {
+    Area() float64
+}
+
+type Perimeter interface {
+    Perimeter() float64
+}
+
+type Geometry interface {
+    Shape
+    Perimeter
+    Name() string
+}
+
+type Circle struct {
+    Radius float64
+}
+
+func (c Circle) Area() float64 {
+    return math.Pi * c.Radius * c.Radius
+}
+
+func (c Circle) Perimeter() float64 {
+    return 2 * math.Pi * c.Radius
+}
+
+func (c Circle) Name() string {
+    return "Круг"
+}
+
+func describe(g Geometry) {
+    fmt.Printf("%s: площадь = %.2f, периметр = %.2f\n",
+        g.Name(), g.Area(), g.Perimeter())
+}</code></pre>
+            </div>
+
+            <!-- Задания -->
+            <div class="lecture-section">
+                <h2>❓ Задания для самостоятельной работы</h2>
+                <div class="info-box">
+                    <i class="fas fa-tasks"></i> <strong>Задание 1:</strong> Создайте структуру <code>Book</code> с полями <code>Title</code> и <code>Author</code>. Напишите для неё метод <code>Info() string</code>, который возвращает строку <code>"Книга 'Title' автора Author"</code>.
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-tasks"></i> <strong>Задание 2:</strong> Определите интерфейс <code>Vehicle</code> с методами <code>Start()</code> и <code>Stop()</code>. Создайте структуры <code>Car</code> и <code>Bicycle</code>, реализующие этот интерфейс.
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-tasks"></i> <strong>Задание 3:</strong> Создайте пустой интерфейс и сохраните в нём: число, строку, срез целых чисел. Напишите функцию <code>printType(i any)</code>, которая определяет тип и выводит сообщение.
+                </div>
+            </div>
+
+            <!-- Навигация между лекциями -->
+            <div class="nav-buttons">
+                <a href="lecture5.html" class="nav-btn prev">← Назад к лекции 5</a>
+                <a href="lecture7.html" class="nav-btn next">Лекция 7 → Обработка ошибок</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <a href="../index.html">GO COURSE</a>
+                    <p>Курс по языку программирования Go</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Навигация</h4>
+                    <a href="../lectures.html">Лекции</a>
+                    <a href="../labs.html">Лабораторные работы</a>
+                    <a href="../test.html">Итоговый тест</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Ресурсы</h4>
+                    <a href="https://go.dev/" target="_blank">Официальный сайт Go</a>
+                    <a href="https://go.dev/tour/" target="_blank">Tour of Go</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Контакты</h4>
+                    <a href="#">support@go-course.ru</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GO COURSE. Все материалы доступны для изучения.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        mobileMenuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
+    </script>
+
+</body>
+</html>

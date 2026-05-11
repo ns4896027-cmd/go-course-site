@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лекции - Курс по Go</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F7FA;
+            color: #1a2a3a;
+            line-height: 1.6;
+        }
+
+        :root {
+            --primary: #007D9C;
+            --primary-dark: #005f73;
+            --primary-light: #e6f3f6;
+            --secondary: #00ADD8;
+            --text-dark: #1a2a3a;
+            --text-light: #5a6e7c;
+            --bg-white: #FFFFFF;
+            --border: #E0E7EC;
+            --shadow: 0 5px 20px rgba(0,0,0,0.08);
+            --shadow-hover: 0 15px 35px rgba(0,125,156,0.15);
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Навигация */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--primary);
+        }
+
+        /* Хлебные крошки */
+        .breadcrumbs {
+            padding-top: 100px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .breadcrumbs span {
+            color: var(--text-light);
+        }
+
+        /* Заголовок */
+        .page-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .page-header h1 {
+            font-size: 48px;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+
+        .page-header p {
+            font-size: 18px;
+            color: var(--text-light);
+        }
+
+        /* Сетка карточек */
+        .lectures-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .lecture-card {
+            background: var(--bg-white);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+            text-decoration: none;
+            display: block;
+        }
+
+        .lecture-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-light);
+        }
+
+        .lecture-number {
+            display: inline-block;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+        }
+
+        .lecture-card h3 {
+            font-size: 22px;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+        }
+
+        .lecture-card p {
+            color: var(--text-light);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .lecture-meta {
+            display: flex;
+            gap: 20px;
+        }
+
+        .lecture-meta span {
+            font-size: 14px;
+            color: var(--text-gray);
+        }
+
+        .lecture-meta i {
+            margin-right: 6px;
+            color: var(--primary);
+        }
+
+        /* Подвал */
+        .footer {
+            background: #1a2a3a;
+            color: white;
+            padding: 60px 0 30px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo a {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-links h4 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .footer-links a {
+            display: block;
+            color: #8a9ba8;
+            text-decoration: none;
+            margin-bottom: 12px;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #8a9ba8;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: var(--shadow);
+            }
+            .nav-links.active { display: flex; }
+            .mobile-menu-btn { display: block; }
+            .lectures-grid { grid-template-columns: 1fr; }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+            .page-header h1 { font-size: 32px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">GO COURSE</a>
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a href="index.html">Главная</a>
+                <a href="lectures.html" class="active">📚 Лекции</a>
+                <a href="labs.html">💻 Лабораторные</a>
+                <a href="test.html">📝 Тест</a>
+                <a href="resources.html">🔗 Ресурсы</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="breadcrumbs">
+            <a href="index.html">Главная</a> → <span>Лекции</span>
+        </div>
+
+        <div class="page-header">
+            <h1>📚 Все лекции курса</h1>
+            <p>8 лекций, которые проведут вас от основ до продвинутых тем</p>
+        </div>
+
+        <div class="lectures-grid">
+            <a href="lectures/lecture1.html" class="lecture-card">
+                <span class="lecture-number">Лекция 1</span>
+                <h3>Введение в Go</h3>
+                <p>История создания, философия языка, инструментарий и основы синтаксиса. Где применяется Go и для чего он нужен.</p>
+                <div class="lecture-meta">
+                    <span><i class="far fa-clock"></i> 60 минут</span>
+                    <span><i class="fas fa-tag"></i> Основы</span>
+                </div>
+            </a>
+
+            <a href="lectures/lecture2.html" class="lecture-card">
+                <span class="lecture-number">Лекция 2</span>
+                <h3>Базовые типы данных</h3>
+                <p>Целочисленные типы, числа с плавающей точкой, строки, логический тип. Объявление переменных и констант.</p>
+                <div class="lecture-meta">
+                    <span><i class="far fa-clock"></i> 45 минут</span>
+                    <span><i class="fas fa-tag"></i> Основы</span>
+                </div>
+            </a>
+
+            <a href="lectures/lecture3.html" class="lecture-card">
+                <span class="lecture-number">Лекция 3</span>
+                <h3>Управляющие конструкции и функции</h3>
+                <p>Условный оператор if, switch, цикл for, функции, параметры и возвращаемые значения.</p>
+                <div class="lecture-meta">
+                    <span><i class="far fa-clock"></i> 60 минут</span>
+                    <span><i class="fas fa-tag"></i> Основы</span>
+                </div>
+            </a>
+
+            <a href="lectures/lecture4.html" class="lecture-card">
+                <span class="lecture-number">Лекция 4</span>
+                <h3>Коллекции: массивы, срезы, карты</h3>
+                <p>Массивы, срезы (slices), операции со срезами, карты (maps), итерация по коллекциям.</p>
+                <div class="lecture-meta">
+                    <span><i class="far fa-clock"></i> 75 минут</span>
+                    <span><i class="fas fa-tag"></i> Средний</span>
+                </div>
+            </a>
+
+            <a href="lectures/lecture5.html" class="lecture-card">
+                <span class="lecture-number">Лекция 5</span>
+                <h3>Карты и структуры</h3>
+                <p>Объявление и инициализация карт, операции с картами, структуры (structs), композиция типов.</p>
+                <div class="lecture-meta">
+                    <span><i class="far fa-clock"></i> 60 минут</span>
+                    <span><i class="fas fa-tag"></i> Средний</span>
+                </div>
+            </a>
+
+            <a href="lectures/lecture6.html" class="lecture-card">
+                <span class="lecture-number">Лекция 6</span>
+                <h3>Методы и интерфейсы</h3>
+                <p>Методы для типов, интерфейсы, пустой интерфейс interface{}, встраивание интерфейсов.</p>
+                <div class="lecture-meta">
+                    <span><i class="far fa-clock"></i> 60 минут</span>
+                    <span><i class="fas fa-tag"></i> Продвинутый</span>
+                </div>
+            </a>
+
+            <a href="lectures/lecture7.html" class="lecture-card">
+                <span class="lecture-number">Лекция 7</span>
+                <h3>Обработка ошибок и работа с ресурсами</h3>
+                <p>Подход Go к обработке ошибок, создание ошибок, работа с файлами, пакеты io и os, пакет time.</p>
+                <div class="lecture-meta">
+                    <span><i class="far fa-clock"></i> 50 минут</span>
+                    <span><i class="fas fa-tag"></i> Продвинутый</span>
+                </div>
+            </a>
+
+            <a href="lectures/lecture8.html" class="lecture-card">
+                <span class="lecture-number">Лекция 8</span>
+                <h3>Конкурентность и веб-сервисы</h3>
+                <p>Горутины, каналы, оператор select, пакет context, создание HTTP-серверов, работа с JSON.</p>
+                <div class="lecture-meta">
+                    <span><i class="far fa-clock"></i> 90 минут</span>
+                    <span><i class="fas fa-tag"></i> Продвинутый</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <a href="index.html">GO COURSE</a>
+                    <p style="margin-top: 16px;">Курс по языку программирования Go</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Навигация</h4>
+                    <a href="lectures.html">Лекции</a>
+                    <a href="labs.html">Лабораторные работы</a>
+                    <a href="test.html">Итоговый тест</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Ресурсы</h4>
+                    <a href="https://go.dev/" target="_blank">Официальный сайт Go</a>
+                    <a href="https://go.dev/tour/" target="_blank">Tour of Go</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Контакты</h4>
+                    <a href="#">support@go-course.ru</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GO COURSE. Все материалы доступны для изучения.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        mobileMenuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
+    </script>
+
+</body>
+</html>

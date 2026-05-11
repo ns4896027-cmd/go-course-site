@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа №2 - Базовые типы данных | Курс по Go</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F7FA;
+            color: #1a2a3a;
+            line-height: 1.6;
+        }
+
+        :root {
+            --primary: #007D9C;
+            --primary-dark: #005f73;
+            --primary-light: #e6f3f6;
+            --secondary: #00ADD8;
+            --text-dark: #1a2a3a;
+            --text-light: #5a6e7c;
+            --bg-white: #FFFFFF;
+            --border: #E0E7EC;
+            --shadow: 0 5px 20px rgba(0,0,0,0.08);
+            --success: #27AE60;
+            --warning: #F39C12;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--primary);
+        }
+
+        .breadcrumbs {
+            padding-top: 100px;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lab-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .lab-header h1 {
+            font-size: 36px;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+
+        .lab-header p {
+            font-size: 18px;
+            color: var(--text-light);
+        }
+
+        .lab-info {
+            background: var(--primary-light);
+            border-radius: 16px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-item i {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .lab-content {
+            background: var(--bg-white);
+            border-radius: 24px;
+            padding: 48px;
+            box-shadow: var(--shadow);
+        }
+
+        .lab-section {
+            margin-bottom: 40px;
+        }
+
+        .lab-section h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--primary-dark);
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 8px;
+        }
+
+        .lab-section h3 {
+            font-size: 22px;
+            margin: 20px 0 12px;
+            color: var(--text-dark);
+        }
+
+        .lab-section p {
+            margin-bottom: 16px;
+            color: var(--text-light);
+        }
+
+        .goal-box {
+            background: linear-gradient(135deg, var(--primary-light) 0%, #f0f7f9 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 20px 0;
+            border-left: 4px solid var(--primary);
+        }
+
+        .task-box {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid var(--border);
+        }
+
+        .task-number {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+
+        .type-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .type-table th, .type-table td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: left;
+        }
+
+        .type-table th {
+            background: var(--primary-light);
+            font-weight: 600;
+        }
+
+        pre {
+            background: #1e2a3a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            background: #f0f2f5;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: var(--primary-dark);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        .tip-box {
+            background: #fef5e7;
+            border-left: 4px solid var(--warning);
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+
+        .result-box {
+            background: #e8f5e9;
+            border-left: 4px solid var(--success);
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .nav-btn.prev:hover {
+            transform: translateX(-5px);
+        }
+
+        .nav-btn.next:hover {
+            transform: translateX(5px);
+        }
+
+        .footer {
+            background: #1a2a3a;
+            color: white;
+            padding: 60px 0 30px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo a {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-links h4 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .footer-links a {
+            display: block;
+            color: #8a9ba8;
+            text-decoration: none;
+            margin-bottom: 12px;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #8a9ba8;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: var(--shadow);
+            }
+            .nav-links.active { display: flex; }
+            .mobile-menu-btn { display: block; }
+            .lab-header h1 { font-size: 28px; }
+            .lab-content { padding: 24px; }
+            .lab-info { flex-direction: column; text-align: center; }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+            .type-table { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">GO COURSE</a>
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a href="../index.html">Главная</a>
+                <a href="../lectures.html">📚 Лекции</a>
+                <a href="../labs.html">💻 Лабораторные</a>
+                <a href="../test.html">📝 Тест</a>
+                <a href="../resources.html">🔗 Ресурсы</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="breadcrumbs">
+            <a href="../index.html">Главная</a> → <a href="../labs.html">Лабораторные работы</a> → <span>Лабораторная работа №2</span>
+        </div>
+
+        <div class="lab-header">
+            <h1>🔢 Лабораторная работа №2</h1>
+            <p>Базовые типы данных, переменные, константы и операции</p>
+        </div>
+
+        <div class="lab-info">
+            <div class="info-item">
+                <i class="fas fa-clock"></i>
+                <span>Время выполнения:</span>
+                <span>60 минут</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-signal"></i>
+                <span>Уровень сложности:</span>
+                <span>Начинающий</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-tasks"></i>
+                <span>Количество заданий:</span>
+                <span>15</span>
+            </div>
+        </div>
+
+        <div class="lab-content">
+            <!-- Цель работы -->
+            <div class="goal-box">
+                <h3><i class="fas fa-bullseye"></i> Цель работы</h3>
+                <p>Научиться объявлять переменные целочисленных типов, понимать их диапазоны, работать с числами с плавающей точкой, логическими операциями, константами, iota, комплексными числами, преобразованием типов и битовыми операциями.</p>
+            </div>
+
+            <!-- Задание 1 -->
+            <div class="lab-section">
+                <h2>📝 Задание 1. Целочисленные типы</h2>
+                <div class="task-box">
+                    <p><span class="task-number">1</span> Объявите переменные следующих типов и присвойте им максимально возможные значения:</p>
+                    <ul style="margin-left: 50px; margin-top: 10px;">
+                        <li><code>int8</code>, <code>int16</code>, <code>int32</code>, <code>int64</code></li>
+                        <li><code>uint8</code>, <code>uint16</code>, <code>uint32</code>, <code>uint64</code></li>
+                        <li><code>byte</code>, <code>rune</code></li>
+                    </ul>
+                    <p style="margin-top: 10px;"><strong>Требования:</strong> Использовать полное объявление переменных (<code>var имя тип = значение</code>). Все переменные должны быть выведены на экран.</p>
+                </div>
+
+                <!-- Задание 2 -->
+                <h2>📝 Задание 2. Числа с плавающей точкой</h2>
+                <div class="task-box">
+                    <p><span class="task-number">2</span> Создайте программу, которая вычисляет площадь круга по формуле: <strong>S = π × R²</strong></p>
+                    <ul>
+                        <li>Используйте константу <code>pi</code> типа <code>float64</code> со значением 3.141592653589793</li>
+                        <li>Запросите у пользователя радиус (тип <code>float64</code>)</li>
+                        <li>Выведите результат с точностью 3 знака после запятой</li>
+                    </ul>
+                </div>
+
+                <!-- Задание 3 -->
+                <h2>📝 Задание 3. Логический тип и условные выражения</h2>
+                <div class="task-box">
+                    <p><span class="task-number">3</span> Объявите переменные типа <code>bool</code>:</p>
+                    <ul>
+                        <li><code>isGoFun = true</code></li>
+                        <li><code>isLearningHard = false</code></li>
+                        <li><code>isWeekend = false</code></li>
+                    </ul>
+                    <p>Выполните операции и выведите результат с пояснением:</p>
+                    <ul>
+                        <li><code>isGoFun && isLearningHard</code></li>
+                        <li><code>isGoFun || isLearningHard</code></li>
+                        <li><code>!isGoFun</code></li>
+                        <li><code>isGoFun && !isLearningHard</code></li>
+                        <li><code>isWeekend || isLearningHard</code></li>
+                    </ul>
+                    <p>Пример вывода: <code>"Результат операции A && B: false, потому что isLearningHard = false"</code></p>
+                </div>
+
+                <!-- Задание 4 -->
+                <h2>📝 Задание 4. Константы и iota</h2>
+                <div class="task-box">
+                    <p><span class="task-number">4</span> Используя <code>iota</code>, создайте константы для дней недели. Выведите на экран.</p>
+                </div>
+
+                <!-- Задание 5 -->
+                <h2>📝 Задание 5. Комплексные числа</h2>
+                <div class="task-box">
+                    <p><span class="task-number">5</span> Объявите два комплексных числа:</p>
+                    <pre><code>var z1 complex64 = 3 + 4i
+var z2 complex128 = 5 + 12i</code></pre>
+                    <p>Выполните операции:</p>
+                    <ul>
+                        <li>Сложение: <code>z1 + z1</code></li>
+                        <li>Вычитание: <code>z1 - z1</code></li>
+                        <li>Умножение: <code>z1 * z1</code></li>
+                        <li>Модуль комплексного числа (используйте <code>cmplx.Abs</code> из пакета <code>math/cmplx</code>)</li>
+                        <li>Действительная и мнимая части (функции <code>real()</code> и <code>imag()</code>)</li>
+                    </ul>
+                </div>
+
+                <!-- Задание 6 -->
+                <h2>📝 Задание 6. Преобразование типов и потеря данных</h2>
+                <div class="task-box">
+                    <p><span class="task-number">6</span> Даны переменные:</p>
+                    <pre><code>var a int64 = 9223372036854775807
+var b int32 = int32(a)
+var c int16 = int16(a)
+var d int8 = int8(a)</code></pre>
+                    <p>Выведите значения a, b, c, d. Объясните, почему при каждом преобразовании данные «обрезаются».</p>
+                    <p>Напишите функцию <code>safeConvertInt64ToInt8(x int64) (int8, error)</code>, которая возвращает ошибку, если значение не помещается в <code>int8</code>.</p>
+                </div>
+
+                <!-- Задание 7 -->
+                <h2>📝 Задание 7. Логические операции с коротким замыканием</h2>
+                <div class="task-box">
+                    <p><span class="task-number">7</span> Проанализируйте код:</p>
+                    <pre><code>func f1() bool {
+    fmt.Print("f1 ")
+    return false
+}
+func f2() bool {
+    fmt.Print("f2 ")
+    return true
+}
+func main() {
+    result1 := f1() && f2()
+    fmt.Println(result1)
+    result2 := f2() || f1()
+    fmt.Println(result2)
+}</code></pre>
+                    <p>Ответьте на вопросы:</p>
+                    <ol>
+                        <li>Почему функция f2() не вызывается в первом выражении?</li>
+                        <li>Почему функция f1() не вызывается во втором выражении?</li>
+                        <li>Напишите пример, где порядок вызовов критичен для логики программы.</li>
+                    </ol>
+                </div>
+
+                <!-- Задание 8 -->
+                <h2>📝 Задание 8. Преобразование строк и чисел</h2>
+                <div class="task-box">
+                    <p><span class="task-number">8</span> Напишите функцию <code>parseAndSum(input string) (int, error)</code>, которая:</p>
+                    <ul>
+                        <li>Принимает строку с числами, разделёнными пробелами (например, "10 20 30")</li>
+                        <li>Разбивает строку на числа</li>
+                        <li>Суммирует их</li>
+                        <li>Возвращает ошибку, если какой-то элемент не является числом</li>
+                    </ul>
+                    <p>Пример: <code>parseAndSum("10 20 30") // 60, nil</code></p>
+                </div>
+
+                <!-- Задание 9 -->
+                <h2>📝 Задание 9. Комплексные числа (арифметика)</h2>
+                <div class="task-box">
+                    <p><span class="task-number">9</span> Даны комплексные числа <code>z1 = 3 + 4i</code> и <code>z2 = 1 - 2i</code>. Вычислите:</p>
+                    <ul>
+                        <li><code>z1 + z2</code></li>
+                        <li><code>z1 - z2</code></li>
+                        <li><code>z1 * z2</code></li>
+                        <li><code>z1 / z2</code></li>
+                        <li>|<code>z1</code>| (модуль)</li>
+                        <li>|<code>z2</code>| (модуль)</li>
+                        <li>Аргумент (угол) z1 в радианах (<code>cmplx.Phase</code>)</li>
+                    </ul>
+                </div>
+
+                <!-- Задание 10 -->
+                <h2>📝 Задание 10. Комплексные числа (квадратное уравнение)</h2>
+                <div class="task-box">
+                    <p><span class="task-number">10</span> Решите квадратное уравнение <strong>ax² + bx + c = 0</strong> для случая с комплексными корнями.</p>
+                    <p>Напишите функцию <code>solveQuadratic(a, b, c float64) (complex128, complex128)</code>, которая возвращает два корня (могут быть комплексными).</p>
+                    <p>Проверьте на примере: <strong>x² + 2x + 5 = 0</strong> (корни: -1 ± 2i)</p>
+                </div>
+
+                <!-- Задание 11 -->
+                <h2>📝 Задание 11. Бинарный вывод с форматированием</h2>
+                <div class="task-box">
+                    <p><span class="task-number">11</span> Напишите функцию <code>printBinary(n int, bits int)</code>, которая выводит число в двоичном виде с указанным количеством бит.</p>
+                    <p>Пример: <code>printBinary(5, 8)</code> → <code>00000101</code></p>
+                </div>
+
+                <!-- Задание 12 -->
+                <h2>📝 Задание 12. Подсчёт битов (population count)</h2>
+                <div class="task-box">
+                    <p><span class="task-number">12</span> Напишите функцию <code>popCount(x uint64) int</code>, которая подсчитывает количество единиц в двоичной записи числа.</p>
+                </div>
+
+                <!-- Задание 13 -->
+                <h2>📝 Задание 13. Переполнение с проверкой</h2>
+                <div class="task-box">
+                    <p><span class="task-number">13</span> Напишите функцию <code>addWithOverflow(a, b int64) (sum int64, overflow bool)</code>, которая возвращает сумму и флаг переполнения.</p>
+                    <p><strong>Подсказка:</strong> Используйте проверку: если a > 0 && b > math.MaxInt64 - a — переполнение.</p>
+                </div>
+
+                <!-- Задание 14 -->
+                <h2>📝 Задание 14. Парсинг бинарной строки</h2>
+                <div class="task-box">
+                    <p><span class="task-number">14</span> Напишите функцию <code>parseBinaryString(s string) (uint64, error)</code>, которая принимает строку из 0 и 1 (например, "1010") и возвращает число.</p>
+                </div>
+
+                <!-- Задание 15 -->
+                <h2>📝 Задание 15. Битовые флаги (bit flags)</h2>
+                <div class="task-box">
+                    <p><span class="task-number">15</span> Создайте систему прав доступа с использованием битовых флагов:</p>
+                    <pre><code>const (
+    Read    = 1 << iota // 1 (001)
+    Write               // 2 (010)
+    Execute             // 4 (100)
+)</code></pre>
+                    <p>Запросите у пользователя три числа (0 или 1) для прав: чтение, запись, выполнение. Сформируйте битовую маску и выведите:</p>
+                    <ul>
+                        <li>Итоговую маску в двоичном виде</li>
+                        <li>Проверку, есть ли право на чтение</li>
+                        <li>Проверку, есть ли право на запись</li>
+                        <li>Проверку, есть ли право на выполнение</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Итог -->
+            <div class="goal-box">
+                <h3><i class="fas fa-trophy"></i> Итог лабораторной работы</h3>
+                <p>После выполнения лабораторной работы студент знает все базовые типы данных Go и их диапазоны, умеет объявлять переменные разными способами (полное объявление через var и короткая запись :=), понимает механизм нулевых значений. Студент умеет выполнять преобразование типов с проверкой на переполнение, владеет битовыми операциями и работой с битовыми флагами, а также умеет работать с комплексными числами и выполнять арифметические операции с ними.</p>
+            </div>
+
+            <!-- Навигация -->
+            <div class="nav-buttons">
+                <a href="lab1.html" class="nav-btn prev">← Лабораторная работа №1</a>
+                <a href="lab3.html" class="nav-btn next">Лабораторная работа №3 →</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <a href="../index.html">GO COURSE</a>
+                    <p>Курс по языку программирования Go</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Навигация</h4>
+                    <a href="../lectures.html">Лекции</a>
+                    <a href="../labs.html">Лабораторные работы</a>
+                    <a href="../test.html">Итоговый тест</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Ресурсы</h4>
+                    <a href="https://go.dev/" target="_blank">Официальный сайт Go</a>
+                    <a href="https://go.dev/tour/" target="_blank">Tour of Go</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Контакты</h4>
+                    <a href="#">support@go-course.ru</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GO COURSE. Все материалы доступны для изучения.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        mobileMenuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Курс по Go | Изучай язык программирования Go</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Основные стили -->
+    <style>
+        /* ========== ОСНОВНЫЕ ПЕРЕМЕННЫЕ ========== */
+        :root {
+            --primary: #007D9C;
+            --primary-dark: #005f73;
+            --primary-light: #e6f3f6;
+            --secondary: #00ADD8;
+            --secondary-light: #cceef5;
+            --text-dark: #1a2a3a;
+            --text-light: #5a6e7c;
+            --text-gray: #8a9ba8;
+            --bg-light: #F5F7FA;
+            --bg-white: #FFFFFF;
+            --border: #E0E7EC;
+            --success: #27AE60;
+            --error: #E74C3C;
+            --warning: #F39C12;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+            --shadow-md: 0 5px 20px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
+            --shadow-hover: 0 15px 35px rgba(0,125,156,0.15);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
+            background-color: var(--bg-light);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+        
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        /* ========== ТИПОГРАФИКА ========== */
+        h1, h2, h3, h4 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        
+        h1 {
+            font-size: 48px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            font-size: 36px;
+            margin-bottom: 16px;
+            color: var(--text-dark);
+        }
+        
+        h3 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        
+        .section-header p {
+            font-size: 18px;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* ========== КНОПКИ ========== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 32px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        /* ========== НАВИГАЦИЯ ========== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-white);
+            box-shadow: var(--shadow-sm);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.95);
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .nav-links .btn-small {
+            padding: 8px 20px;
+            font-size: 14px;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--primary);
+        }
+        
+        /* ========== ГЛАВНЫЙ ЭКРАН ========== */
+        .hero {
+            padding: 140px 0 80px;
+            background: linear-gradient(135deg, #e8f4f8 0%, #d4eaf1 100%);
+        }
+        
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        
+        .hero-text p {
+            font-size: 20px;
+            color: var(--text-light);
+            margin-bottom: 32px;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 48px;
+        }
+        
+        .hero-stats {
+            display: flex;
+            gap: 40px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+        
+        .hero-image {
+            text-align: center;
+        }
+        
+        .hero-image i {
+            font-size: 200px;
+            color: var(--primary);
+        }
+        
+        /* ========== КАРТОЧКИ ТЕМ ========== */
+        .topics {
+            padding: 80px 0;
+            background: var(--bg-white);
+        }
+        
+        .topics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+        }
+        
+        .topic-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 30px;
+            transition: var(--transition);
+            text-decoration: none;
+            display: block;
+        }
+        
+        .topic-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--primary-light);
+        }
+        
+        .topic-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .topic-icon i {
+            font-size: 28px;
+            color: var(--primary);
+        }
+        
+        .topic-card h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+        
+        .topic-card p {
+            color: var(--text-light);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        /* ========== О КУРСЕ ========== */
+        .about {
+            padding: 80px 0;
+            background: var(--bg-light);
+        }
+        
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        
+        .about-text p {
+            margin-bottom: 24px;
+            color: var(--text-light);
+        }
+        
+        .skills-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 30px;
+        }
+        
+        .skill-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .skill-item i {
+            color: var(--success);
+            font-size: 18px;
+        }
+        
+        /* ========== ПРЕИМУЩЕСТВА ========== */
+        .features {
+            padding: 80px 0;
+            background: var(--bg-white);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+        }
+        
+        .feature-card {
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary-light) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        
+        .feature-icon i {
+            font-size: 32px;
+            color: var(--primary);
+        }
+        
+        .feature-card h4 {
+            margin-bottom: 10px;
+        }
+        
+        .feature-card p {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+        
+        /* ========== КАК ПРОХОДИТ ОБУЧЕНИЕ ========== */
+        .how-it-works {
+            padding: 80px 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+        
+        .how-it-works .section-header p {
+            color: rgba(255,255,255,0.9);
+        }
+        
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            margin-top: 40px;
+        }
+        
+        .step {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0 auto 20px;
+        }
+        
+        .step h3 {
+            margin-bottom: 10px;
+        }
+        
+        .step p {
+            opacity: 0.9;
+        }
+        
+        /* ========== ОТЗЫВЫ ========== */
+        .testimonials {
+            padding: 80px 0;
+            background: var(--bg-light);
+        }
+        
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        
+        .testimonial-card {
+            background: var(--bg-white);
+            border-radius: var(--radius-md);
+            padding: 30px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .testimonial-text {
+            font-style: italic;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+        
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .testimonial-author i {
+            font-size: 48px;
+            color: var(--primary-light);
+        }
+        
+        .testimonial-author h4 {
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        
+        .testimonial-author p {
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+        
+        /* ========== CTA ========== */
+        .cta {
+            padding: 80px 0;
+            background: var(--bg-white);
+            text-align: center;
+        }
+        
+        .cta h2 {
+            margin-bottom: 16px;
+        }
+        
+        .cta p {
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto 32px;
+        }
+        
+        /* ========== ПОДВАЛ ========== */
+        .footer {
+            background: #1a2a3a;
+            color: white;
+            padding: 60px 0 30px;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-logo a {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+        }
+        
+        .footer-logo p {
+            margin-top: 16px;
+            color: var(--text-gray);
+        }
+        
+        .footer-links h4 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
+        .footer-links a {
+            display: block;
+            color: var(--text-gray);
+            text-decoration: none;
+            margin-bottom: 12px;
+            transition: var(--transition);
+        }
+        
+        .footer-links a:hover {
+            color: var(--secondary);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-gray);
+            font-size: 14px;
+        }
+        
+        /* ========== АДАПТИВНОСТЬ ========== */
+        @media (max-width: 1024px) {
+            h1 { font-size: 40px; }
+            h2 { font-size: 32px; }
+            .hero-content,
+            .about-content { grid-template-columns: 1fr; }
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+            .steps { grid-template-columns: 1fr; gap: 30px; }
+            .testimonials-grid { grid-template-columns: 1fr; }
+            .footer-content { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: var(--bg-white);
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: var(--shadow-md);
+            }
+            .nav-links.active {
+                display: flex;
+            }
+            .mobile-menu-btn {
+                display: block;
+            }
+            h1 { font-size: 32px; }
+            h2 { font-size: 28px; }
+            .hero-buttons { flex-direction: column; }
+            .hero-stats { flex-wrap: wrap; justify-content: center; }
+            .features-grid { grid-template-columns: 1fr; }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+            .topics-grid { grid-template-columns: 1fr; }
+            .skills-list { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+ <!-- ========== НАВИГАЦИЯ ========== -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="logo">GO COURSE</a>
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a href="lectures.html">📚 Лекции</a>
+                <a href="labs.html">💻 Лабораторные</a>
+                
+                <a href="resources.html">🔗 Ресурсы</a>
+                <a href="test.html" class="btn btn-small btn-primary">Начать тест</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========== ГЛАВНЫЙ ЭКРАН ========== -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Изучай Go с нуля до профессионала</h1>
+                    <p>Полный курс по языку программирования Go: теория, практика, проекты и итоговый тест. Всё, что нужно для старта карьеры Go-разработчика.</p>
+                    <div class="hero-buttons">
+                        <a href="lectures.html" class="btn btn-primary">Смотреть лекции</a>
+                        <a href="test.html" class="btn btn-outline">Пройти тест</a>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">8</div>
+                            <div class="stat-label">Лекций</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">7</div>
+                            <div class="stat-label">Лабораторных</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">30</div>
+                            <div class="stat-label">Вопросов в тесте</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">2</div>
+                            <div class="stat-label">Проекта</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <i class="fab fa-golang"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== О КУРСЕ ========== -->
+    <section class="about">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-text">
+                    <h2>Почему стоит учить Go?</h2>
+                    <p>Go (Golang) — это язык программирования, созданный в Google для решения задач масштабирования и производительности. Сегодня на Go написаны Docker, Kubernetes, Terraform, Prometheus и многие другие ключевые технологии облачной инфраструктуры.</p>
+                    <p>Курс разработан так, чтобы вы получили не только теоретические знания, но и практические навыки, необходимые для реальной разработки.</p>
+                    <div class="skills-list">
+                        <div class="skill-item"><i class="fas fa-check-circle"></i> Конкурентное программирование</div>
+                        <div class="skill-item"><i class="fas fa-check-circle"></i> Создание веб-сервисов</div>
+                        <div class="skill-item"><i class="fas fa-check-circle"></i> Работа с коллекциями</div>
+                        <div class="skill-item"><i class="fas fa-check-circle"></i> Интерфейсы и методы</div>
+                        <div class="skill-item"><i class="fas fa-check-circle"></i> Обработка ошибок</div>
+                        <div class="skill-item"><i class="fas fa-check-circle"></i> Тестирование</div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <i class="fab fa-golang" style="font-size: 200px; color: var(--primary); opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== ТЕМЫ КУРСА ========== -->
+    <section class="topics">
+        <div class="container">
+            <div class="section-header">
+                <h2>Темы курса</h2>
+                <p>8 лекций, которые проведут вас от основ до продвинутых тем</p>
+            </div>
+            <div class="topics-grid">
+                <a href="lectures/lecture1.html" class="topic-card">
+                    <div class="topic-icon"><i class="fas fa-flag-checkered"></i></div>
+                    <h3>Введение в Go</h3>
+                    <p>История, философия, инструментарий, основы синтаксиса</p>
+                </a>
+                <a href="lectures/lecture2.html" class="topic-card">
+                    <div class="topic-icon"><i class="fas fa-database"></i></div>
+                    <h3>Базовые типы данных</h3>
+                    <p>Переменные, константы, типы, нулевые значения</p>
+                </a>
+                <a href="lectures/lecture3.html" class="topic-card">
+                    <div class="topic-icon"><i class="fas fa-code-branch"></i></div>
+                    <h3>Управляющие конструкции</h3>
+                    <p>If, switch, for, функции, параметры</p>
+                </a>
+                <a href="lectures/lecture4.html" class="topic-card">
+                    <div class="topic-icon"><i class="fas fa-layer-group"></i></div>
+                    <h3>Коллекции</h3>
+                    <p>Массивы, срезы (slices), операции со срезами</p>
+                </a>
+                <a href="lectures/lecture5.html" class="topic-card">
+                    <div class="topic-icon"><i class="fas fa-table"></i></div>
+                    <h3>Карты и структуры</h3>
+                    <p>Map, struct, методы, группировка данных</p>
+                </a>
+                <a href="lectures/lecture6.html" class="topic-card">
+                    <div class="topic-icon"><i class="fas fa-plug"></i></div>
+                    <h3>Методы и интерфейсы</h3>
+                    <p>Интерфейсы, duck typing, пустой интерфейс</p>
+                </a>
+                <a href="lectures/lecture7.html" class="topic-card">
+                    <div class="topic-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    <h3>Обработка ошибок</h3>
+                    <p>errors, файлы, пакет time, ресурсы</p>
+                </a>
+                <a href="lectures/lecture8.html" class="topic-card">
+                    <div class="topic-icon"><i class="fas fa-globe"></i></div>
+                    <h3>Конкурентность и веб</h3>
+                    <p>Горутины, каналы, контекст, HTTP-серверы</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== ПРЕИМУЩЕСТВА ========== -->
+    <section class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Почему этот курс?</h2>
+                <p>Всё, что нужно для успешного старта в Go-разработке</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-chalkboard-user"></i></div>
+                    <h4>Структурированные лекции</h4>
+                    <p>8 лекций от простого к сложному с примерами кода</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-laptop-code"></i></div>
+                    <h4>Практические задания</h4>
+                    <p>7 лабораторных работ с реальными проектами</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-rocket"></i></div>
+                    <h4>Конкурентное программирование</h4>
+                    <p>Горутины, каналы, контекст — главная фишка Go</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-check-double"></i></div>
+                    <h4>Итоговый тест</h4>
+                    <p>30 вопросов для проверки знаний</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== КАК ПРОХОДИТ ОБУЧЕНИЕ ========== -->
+    <section class="how-it-works">
+        <div class="container">
+            <div class="section-header">
+                <h2 style="color: white;">Как проходит обучение</h2>
+                <p>Три простых шага к освоению Go</p>
+            </div>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>📖 Изучаем лекции</h3>
+                    <p>Каждая лекция содержит теорию, примеры кода и контрольные вопросы</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>💻 Выполняем лабораторные</h3>
+                    <p>Закрепляем материал на практике, пишем код, решаем задачи</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>📝 Проходим тест</h3>
+                    <p>Проверяем знания и получаем оценку</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== ОТЗЫВЫ ========== -->
+    <section class="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <h2>Что говорят студенты</h2>
+                <p>Курс уже помог многим начать путь в Go-разработку</p>
+            </div>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "Отличный курс! Всё структурировано, много примеров. Особенно понравились проекты — реальная практика, а не просто теория."
+                    </div>
+                    <div class="testimonial-author">
+                        <i class="fas fa-user-circle fa-3x"></i>
+                        <div>
+                            <h4>Анна Смирнова</h4>
+                            <p>Junior-разработчик</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "Изучал Go по документации, но этот курс помог систематизировать знания. Конкурентность объясняется очень доступно."
+                    </div>
+                    <div class="testimonial-author">
+                        <i class="fas fa-user-circle fa-3x"></i>
+                        <div>
+                            <h4>Дмитрий Иванов</h4>
+                            <p>DevOps-инженер</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-text">
+                        "Лабораторные работы — настоящий бриллиант курса. После выполнения проектов чувствуешь себя уверенно."
+                    </div>
+                    <div class="testimonial-author">
+                        <i class="fas fa-user-circle fa-3x"></i>
+                        <div>
+                            <h4>Елена Петрова</h4>
+                            <p>Студент</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== CTA ========== -->
+    <section class="cta">
+        <div class="container">
+            <h2>Готовы начать?</h2>
+            <p>Присоединяйтесь к курсу и станьте разработчиком на одном из самых востребованных языков программирования</p>
+            <a href="lectures.html" class="btn btn-primary">Начать обучение сейчас</a>
+        </div>
+    </section>
+
+    <!-- ========== ПОДВАЛ ========== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <a href="index.html">GO COURSE</a>
+                    <p>Курс по языку программирования Go. Теория, практика, тесты.</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Навигация</h4>
+                    <a href="lectures.html">Лекции</a>
+                    <a href="labs.html">Лабораторные работы</a>
+                    <a href="test.html">Итоговый тест</a>
+                    <a href="resources.html">Полезные ресурсы</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Полезные ссылки</h4>
+                    <a href="https://go.dev/" target="_blank">Официальный сайт Go</a>
+                    <a href="https://go.dev/tour/" target="_blank">Tour of Go</a>
+                    <a href="https://gobyexample.com/" target="_blank">Go by Example</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Контакты</h4>
+                    <a href="#">support@go-course.ru</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GO COURSE. Все материалы доступны для свободного изучения.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========== СКРИПТЫ ========== -->
+    <script>
+        // Бургер-меню для мобильных устройств
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+
+        // Закрытие меню при клике на ссылку
+        navLinks.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+            });
+        });
+    </script>
+
+</body>
+</html>
+
+

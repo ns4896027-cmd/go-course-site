@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лекция 1 - Введение в Go | Курс по Go</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F7FA;
+            color: #1a2a3a;
+            line-height: 1.6;
+        }
+
+        :root {
+            --primary: #007D9C;
+            --primary-dark: #005f73;
+            --primary-light: #e6f3f6;
+            --secondary: #00ADD8;
+            --text-dark: #1a2a3a;
+            --text-light: #5a6e7c;
+            --bg-white: #FFFFFF;
+            --border: #E0E7EC;
+            --shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--primary);
+        }
+
+        .breadcrumbs {
+            padding-top: 100px;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lecture-content {
+            background: var(--bg-white);
+            border-radius: 24px;
+            padding: 48px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .lecture-title {
+            font-size: 36px;
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 24px;
+            color: var(--text-dark);
+            border-left: 4px solid var(--primary);
+            padding-left: 20px;
+        }
+
+        .lecture-section {
+            margin-bottom: 40px;
+        }
+
+        .lecture-section h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--primary-dark);
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 8px;
+        }
+
+        .lecture-section h3 {
+            font-size: 22px;
+            margin: 20px 0 12px;
+            color: var(--text-dark);
+        }
+
+        .lecture-section p {
+            margin-bottom: 16px;
+            color: var(--text-light);
+        }
+
+        .info-box {
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+
+        .info-box i {
+            color: var(--primary);
+            margin-right: 10px;
+        }
+
+        .creator-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 16px;
+            margin: 20px 0;
+        }
+
+        .creator-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .creator-icon i {
+            font-size: 28px;
+            color: var(--primary);
+        }
+
+        .creator-info h4 {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .creator-info p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .feature-item {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .feature-item i {
+            font-size: 36px;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .feature-item h4 {
+            margin-bottom: 8px;
+        }
+
+        .feature-item p {
+            font-size: 14px;
+        }
+
+        .timeline {
+            margin: 30px 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .timeline-year {
+            font-weight: 700;
+            color: var(--primary);
+            min-width: 80px;
+            font-size: 18px;
+        }
+
+        .timeline-text {
+            color: var(--text-light);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .nav-btn.next:hover {
+            transform: translateX(5px);
+        }
+
+        .footer {
+            background: #1a2a3a;
+            color: white;
+            padding: 60px 0 30px;
+            margin-top: 40px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo a {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-links h4 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .footer-links a {
+            display: block;
+            color: #8a9ba8;
+            text-decoration: none;
+            margin-bottom: 12px;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #8a9ba8;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: var(--shadow);
+            }
+            .nav-links.active { display: flex; }
+            .mobile-menu-btn { display: block; }
+            .lecture-content { padding: 24px; }
+            .lecture-title { font-size: 28px; }
+            .features-grid { grid-template-columns: 1fr; }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+            .timeline-item { flex-direction: column; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">GO COURSE</a>
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a href="../index.html">Главная</a>
+                <a href="../lectures.html">📚 Лекции</a>
+                <a href="../labs.html">💻 Лабораторные</a>
+                <a href="../test.html">📝 Тест</a>
+                <a href="../resources.html">🔗 Ресурсы</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="breadcrumbs">
+            <a href="../index.html">Главная</a> → <a href="../lectures.html">Лекции</a> → <span>Лекция 1</span>
+        </div>
+
+        <div class="lecture-content">
+            <h1 class="lecture-title">Лекция 1. Введение в Go</h1>
+
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i> <strong>Длительность лекции:</strong> 60 минут<br>
+                <i class="fas fa-code"></i> <strong>Уровень:</strong> Начинающий<br>
+                <i class="fas fa-flask"></i> <strong>Темы:</strong> История, философия, применение, ключевые особенности
+            </div>
+
+            <!-- История создания -->
+            <div class="lecture-section">
+                <h2>📜 История создания Go</h2>
+                <p>Конец 2000-х годов. Компания Google столкнулась с проблемой масштабирования программных систем. Тысячи разработчиков, миллионы строк кода на C++ и Java. Компиляция больших проектов на C++ занимала часы, а Java была слишком тяжеловесной.</p>
+                <p>Три инженера Google задались вопросом: <strong>«А можем ли мы создать язык, который сочетал бы производительность C++ с простотой Python?»</strong></p>
+
+                <h3>Создатели языка</h3>
+                <div class="creator-card">
+                    <div class="creator-icon"><i class="fas fa-user-tie"></i></div>
+                    <div class="creator-info">
+                        <h4>Роберт Гризмер (Robert Griesemer)</h4>
+                        <p>Работал над реализациями JavaScript (V8) и Java (HotSpot)</p>
+                    </div>
+                </div>
+                <div class="creator-card">
+                    <div class="creator-icon"><i class="fas fa-user-tie"></i></div>
+                    <div class="creator-info">
+                        <h4>Роб Пайк (Rob Pike)</h4>
+                        <p>Легенда Unix, соавтор UTF-8</p>
+                    </div>
+                </div>
+                <div class="creator-card">
+                    <div class="creator-icon"><i class="fas fa-user-tie"></i></div>
+                    <div class="creator-info">
+                        <h4>Кен Томпсон (Ken Thompson)</h4>
+                        <p>Один из создателей Unix и языка B, лауреат премии Тьюринга</p>
+                    </div>
+                </div>
+
+                <h3>Хронология</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-year">2007 г.</div>
+                        <div class="timeline-text">Начало разработки (внутренний 20%-ный проект)</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2009 г.</div>
+                        <div class="timeline-text">Официальный анонс 10 ноября</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-year">2012 г.</div>
+                        <div class="timeline-text">Выход версии 1.0 — обещание обратной совместимости</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Где применяется Go -->
+            <div class="lecture-section">
+                <h2>📍 Где применяется Go</h2>
+                <p>Go стал стандартом в целых индустриях. Вот лишь несколько примеров:</p>
+                
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <i class="fas fa-cloud"></i>
+                        <h4>Облачная инфраструктура</h4>
+                        <p>Docker, Kubernetes, Terraform, Prometheus</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-server"></i>
+                        <h4>Высоконагруженные бэкенд-сервисы</h4>
+                        <p>Avito, Ozon, Wildberries, YouTube</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-network-wired"></i>
+                        <h4>Сетевые приложения</h4>
+                        <p>Caddy, Traefik, VPN-сервисы</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-terminal"></i>
+                        <h4>CLI-утилиты</h4>
+                        <p>GitHub CLI, Hugo, Docker CLI</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Для чего нужен Go -->
+            <div class="lecture-section">
+                <h2>🎯 Для чего нужен Go</h2>
+                <p>Go решает конкретные задачи, и его выбор обычно обусловлен следующими целями:</p>
+                <ul style="margin-left: 24px; margin-bottom: 16px;">
+                    <li><strong>Микросервисная архитектура</strong> — сервисы быстро запускаются и мало весят</li>
+                    <li><strong>Сетевые сервисы</strong> — высокая нагрузка на соединения (WebSocket, HTTP/2)</li>
+                    <li><strong>Инструменты DevOps</strong> — работают везде без установки зависимостей</li>
+                    <li><strong>Замена Python</strong> там, где нужна производительность</li>
+                </ul>
+                <div class="info-box">
+                    <i class="fas fa-lightbulb"></i> <strong>Чего НЕ делают на Go:</strong> системное программирование (ядра ОС, драйверы), десктопные приложения с GUI, Data Science, AAA-игры.
+                </div>
+            </div>
+
+            <!-- Философия Go -->
+            <div class="lecture-section">
+                <h2>💡 Философия Go</h2>
+                <p>Главный девиз языка, сформулированный Робом Пайком: <strong>«Less is exponentially more»</strong> (Меньшее — экспоненциально лучшее).</p>
+                
+                <h3>Простота и читаемость</h3>
+                <p>Код пишется один раз, а читается сотни раз. В Go всего 25 ключевых слов, нет перегрузки функций, нет классов и наследования. Утилита <code>go fmt</code> автоматически приводит код к единому стилю — в сообществе Go нет споров о форматировании.</p>
+                
+                <h3>Явность лучше неявного</h3>
+                <p>Нет неявных преобразований типов. Нет исключений (exceptions) — ошибка — это просто ещё одно возвращаемое значение. Это заставляет разработчика думать об обработке ошибок здесь и сейчас.</p>
+                
+                <h3>Эффективность</h3>
+                <p>Компиляция в машинный код, быстрая компиляция (даже большие проекты за секунды), эффективный сборщик мусора с минимальными задержками.</p>
+            </div>
+
+            <!-- Ключевые особенности -->
+            <div class="lecture-section">
+                <h2>⚡ Ключевые особенности языка</h2>
+                
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <h4>Статическая типизация</h4>
+                        <p>Ошибки типов на этапе компиляции, а не в рантайме</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-rocket"></i>
+                        <h4>Быстрая компиляция</h4>
+                        <p>Проекты компилируются за секунды</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-code-branch"></i>
+                        <h4>Встроенная конкурентность</h4>
+                        <p>Горутины (легковесные потоки, ~2 КБ) и каналы для общения</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-box"></i>
+                        <h4>Один бинарный файл</h4>
+                        <p>Статическая компиляция — нет зависимостей, просто скопируйте и запустите</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-layer-group"></i>
+                        <h4>Кросс-компиляция</h4>
+                        <p>Сборка под любую платформу из коробки</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-book"></i>
+                        <h4>Богатая стандартная библиотека</h4>
+                        <p>net/http, encoding/json, crypto, testing — «батарейки в комплекте»</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Навигация между лекциями -->
+            <div class="nav-buttons">
+                <span style="visibility: hidden;"></span>
+                <a href="lecture2.html" class="nav-btn next">Следующая лекция → Базовые типы данных</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <a href="../index.html">GO COURSE</a>
+                    <p style="margin-top: 16px;">Курс по языку программирования Go</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Навигация</h4>
+                    <a href="../lectures.html">Лекции</a>
+                    <a href="../labs.html">Лабораторные работы</a>
+                    <a href="../test.html">Итоговый тест</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Ресурсы</h4>
+                    <a href="https://go.dev/" target="_blank">Официальный сайт Go</a>
+                    <a href="https://go.dev/tour/" target="_blank">Tour of Go</a>
+                    <a href="https://gobyexample.com/" target="_blank">Go by Example</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Контакты</h4>
+                    <a href="#">support@go-course.ru</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GO COURSE. Все материалы доступны для изучения.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        mobileMenuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
+    </script>
+
+</body>
+</html>

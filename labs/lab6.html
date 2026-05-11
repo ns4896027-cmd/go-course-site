@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа №6 - Проект «Зоопарк» | Курс по Go</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F7FA;
+            color: #1a2a3a;
+            line-height: 1.6;
+        }
+
+        :root {
+            --primary: #007D9C;
+            --primary-dark: #005f73;
+            --primary-light: #e6f3f6;
+            --secondary: #00ADD8;
+            --text-dark: #1a2a3a;
+            --text-light: #5a6e7c;
+            --bg-white: #FFFFFF;
+            --border: #E0E7EC;
+            --shadow: 0 5px 20px rgba(0,0,0,0.08);
+            --success: #27AE60;
+            --warning: #F39C12;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--primary);
+        }
+
+        .breadcrumbs {
+            padding-top: 100px;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lab-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .lab-header h1 {
+            font-size: 36px;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 16px;
+        }
+
+        .lab-header p {
+            font-size: 18px;
+            color: var(--text-light);
+        }
+
+        .lab-info {
+            background: var(--primary-light);
+            border-radius: 16px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-item i {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .lab-content {
+            background: var(--bg-white);
+            border-radius: 24px;
+            padding: 48px;
+            box-shadow: var(--shadow);
+        }
+
+        .lab-section {
+            margin-bottom: 40px;
+        }
+
+        .lab-section h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--primary-dark);
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 8px;
+        }
+
+        .lab-section h3 {
+            font-size: 22px;
+            margin: 20px 0 12px;
+            color: var(--text-dark);
+        }
+
+        .goal-box {
+            background: linear-gradient(135deg, var(--primary-light) 0%, #f0f7f9 100%);
+            border-radius: 16px;
+            padding: 24px;
+            margin: 20px 0;
+            border-left: 4px solid var(--primary);
+        }
+
+        .task-box {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid var(--border);
+        }
+
+        .task-number {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 12px;
+        }
+
+        pre {
+            background: #1e2a3a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            background: #f0f2f5;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: var(--primary-dark);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        .screenshot-box {
+            background: #f0f2f5;
+            border: 2px dashed var(--primary);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .screenshot-box i {
+            font-size: 48px;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+
+        .screenshot-box p {
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        .screenshot-box small {
+            color: var(--text-gray);
+            font-size: 12px;
+        }
+
+        .console-output {
+            background: #1e2a3a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .nav-btn.prev:hover {
+            transform: translateX(-5px);
+        }
+
+        .nav-btn.next:hover {
+            transform: translateX(5px);
+        }
+
+        .footer {
+            background: #1a2a3a;
+            color: white;
+            padding: 60px 0 30px;
+            margin-top: 60px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo a {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-links h4 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .footer-links a {
+            display: block;
+            color: #8a9ba8;
+            text-decoration: none;
+            margin-bottom: 12px;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #8a9ba8;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: var(--shadow);
+            }
+            .nav-links.active { display: flex; }
+            .mobile-menu-btn { display: block; }
+            .lab-header h1 { font-size: 28px; }
+            .lab-content { padding: 24px; }
+            .lab-info { flex-direction: column; text-align: center; }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">GO COURSE</a>
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a href="../index.html">Главная</a>
+                <a href="../lectures.html">📚 Лекции</a>
+                <a href="../labs.html">💻 Лабораторные</a>
+                <a href="../test.html">📝 Тест</a>
+                <a href="../resources.html">🔗 Ресурсы</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="breadcrumbs">
+            <a href="../index.html">Главная</a> → <a href="../labs.html">Лабораторные работы</a> → <span>Лабораторная работа №6</span>
+        </div>
+
+        <div class="lab-header">
+            <h1>🐘 Лабораторная работа №6</h1>
+            <p>Проект «Зоопарк» (Методы и интерфейсы)</p>
+        </div>
+
+        <div class="lab-info">
+            <div class="info-item">
+                <i class="fas fa-clock"></i>
+                <span>Время выполнения:</span>
+                <span>90 минут</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-signal"></i>
+                <span>Уровень сложности:</span>
+                <span>Продвинутый</span>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-project-diagram"></i>
+                <span>Тип:</span>
+                <span>Проект</span>
+            </div>
+        </div>
+
+        <div class="lab-content">
+            <!-- Цель работы -->
+            <div class="goal-box">
+                <h3><i class="fas fa-bullseye"></i> Цель работы</h3>
+                <p>Изучить методы и интерфейсы в Go, освоить неявную реализацию интерфейсов (duck typing), создать полноценный проект с использованием объектно-ориентированного подхода на Go.</p>
+            </div>
+
+            <!-- Описание проекта -->
+            <div class="lab-section">
+                <h2>📋 Описание проекта</h2>
+                <p>Вам необходимо создать систему для управления животными в зоопарке. Система должна уметь:</p>
+                <ul>
+                    <li>Добавлять различных животных</li>
+                    <li>Получать информацию о каждом животном</li>
+                    <li>Издавать звуки животных</li>
+                    <li>Подсчитывать общее количество животных и другие статистические данные</li>
+                </ul>
+            </div>
+
+            <!-- Структура проекта -->
+            <div class="lab-section">
+                <h2>📁 Структура проекта</h2>
+                <pre><code>zoo_project/
+├── main.go              # главный файл с функцией main
+├── animals/             # пакет с животными
+│   ├── animal.go        # интерфейс Animal
+│   ├── dog.go           # структура Dog
+│   ├── cat.go           # структура Cat
+│   ├── bird.go          # структура Bird
+│   └── zoo.go           # структура Zoo для управления животными
+└── go.mod               # модуль проекта (создаётся автоматически)</code></pre>
+            </div>
+
+            <!-- Этап 1 -->
+            <div class="lab-section">
+                <h2>🔨 Этап 1. Создание интерфейса Animal</h2>
+                <div class="task-box">
+                    <p><span class="task-number">1</span> Создайте файл <code>animals/animal.go</code> с интерфейсом <code>Animal</code>, который содержит следующие методы:</p>
+                    <pre><code>type Animal interface {
+    Speak() string        // звук, который издаёт животное
+    Move() string         // как животное двигается
+    GetInfo() string      // полная информация о животном
+    GetName() string      // имя животного
+    GetType() string      // тип животного (собака, кошка и т.д.)
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- Этап 2 -->
+            <div class="lab-section">
+                <h2>🔨 Этап 2. Создание структур животных</h2>
+                
+                <h3>Файл <code>animals/dog.go</code></h3>
+                <div class="task-box">
+                    <pre><code>package animals
+
+import "fmt"
+
+type Dog struct {
+    Name  string
+    Breed string
+    Age   int
+}
+
+func (d Dog) Speak() string {
+    return "Гав-гав!"
+}
+
+func (d Dog) Move() string {
+    return "бегает на четырёх лапах"
+}
+
+func (d Dog) GetName() string {
+    return d.Name
+}
+
+func (d Dog) GetType() string {
+    return "Собака"
+}
+
+func (d Dog) GetInfo() string {
+    return fmt.Sprintf("%s (%s), порода: %s, возраст: %d лет", 
+        d.GetType(), d.Name, d.Breed, d.Age)
+}</code></pre>
+                </div>
+
+                <h3>Файл <code>animals/cat.go</code></h3>
+                <div class="task-box">
+                    <pre><code>package animals
+
+import "fmt"
+
+type Cat struct {
+    Name  string
+    Color string
+    Age   int
+}
+
+func (c Cat) Speak() string {
+    return "Мяу-мяу!"
+}
+
+func (c Cat) Move() string {
+    return "крадётся бесшумно"
+}
+
+func (c Cat) GetName() string {
+    return c.Name
+}
+
+func (c Cat) GetType() string {
+    return "Кошка"
+}
+
+func (c Cat) GetInfo() string {
+    return fmt.Sprintf("%s (%s), цвет: %s, возраст: %d лет", 
+        c.GetType(), c.Name, c.Color, c.Age)
+}</code></pre>
+                </div>
+
+                <h3>Файл <code>animals/bird.go</code></h3>
+                <div class="task-box">
+                    <pre><code>package animals
+
+import "fmt"
+
+type Bird struct {
+    Name   string
+    CanFly bool
+    Age    int
+}
+
+func (b Bird) Speak() string {
+    if b.CanFly {
+        return "Чирик-чирик!"
+    }
+    return "Ку-ка-ре-ку!"
+}
+
+func (b Bird) Move() string {
+    if b.CanFly {
+        return "летает по небу"
+    }
+    return "ходит по земле"
+}
+
+func (b Bird) GetName() string {
+    return b.Name
+}
+
+func (b Bird) GetType() string {
+    if b.CanFly {
+        return "Птица (летающая)"
+    }
+    return "Птица (нелетающая)"
+}
+
+func (b Bird) GetInfo() string {
+    flyStatus := "летает"
+    if !b.CanFly {
+        flyStatus = "не летает"
+    }
+    return fmt.Sprintf("%s (%s), возраст: %d лет, %s", 
+        b.GetType(), b.Name, b.Age, flyStatus)
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- Этап 3 -->
+            <div class="lab-section">
+                <h2>🔨 Этап 3. Создание структуры Zoo</h2>
+                <div class="task-box">
+                    <p><span class="task-number">3</span> Создайте файл <code>animals/zoo.go</code> со структурой <code>Zoo</code> и методами управления животными:</p>
+                    <pre><code>package animals
+
+import "fmt"
+
+type Zoo struct {
+    Name    string
+    animals []Animal
+}
+
+func NewZoo(name string) *Zoo {
+    return &Zoo{
+        Name:    name,
+        animals: make([]Animal, 0),
+    }
+}
+
+func (z *Zoo) AddAnimal(a Animal) {
+    z.animals = append(z.animals, a)
+    fmt.Printf("Животное '%s' добавлено в зоопарк '%s'\n", a.GetName(), z.Name)
+}
+
+func (z *Zoo) RemoveAnimal(name string) bool {
+    for i, a := range z.animals {
+        if a.GetName() == name {
+            z.animals = append(z.animals[:i], z.animals[i+1:]...)
+            fmt.Printf("Животное '%s' удалено из зоопарка\n", name)
+            return true
+        }
+    }
+    fmt.Printf("Животное '%s' не найдено\n", name)
+    return false
+}
+
+func (z *Zoo) FindAnimal(name string) Animal {
+    for _, a := range z.animals {
+        if a.GetName() == name {
+            return a
+        }
+    }
+    return nil
+}
+
+func (z *Zoo) ListAllAnimals() {
+    if len(z.animals) == 0 {
+        fmt.Println("В зоопарке нет животных")
+        return
+    }
+    
+    fmt.Printf("\n=== Животные в зоопарке '%s' ===\n", z.Name)
+    for i, a := range z.animals {
+        fmt.Printf("%d. %s\n", i+1, a.GetInfo())
+        fmt.Printf("   Звук: %s\n", a.Speak())
+        fmt.Printf("   Движение: %s\n", a.Move())
+        fmt.Println()
+    }
+}
+
+func (z *Zoo) GetTotalAnimals() int {
+    return len(z.animals)
+}
+
+func (z *Zoo) MakeAllSounds() {
+    fmt.Printf("\n=== Все животные зоопарка '%s' издают звуки ===\n", z.Name)
+    for _, a := range z.animals {
+        fmt.Printf("%s: %s\n", a.GetName(), a.Speak())
+    }
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- Этап 4 -->
+            <div class="lab-section">
+                <h2>🔨 Этап 4. Главная программа</h2>
+                <div class="task-box">
+                    <p><span class="task-number">4</span> Создайте файл <code>main.go</code>:</p>
+                    <pre><code>package main
+
+import (
+    "bufio"
+    "fmt"
+    "os"
+    "strconv"
+    "strings"
+    "zoo_project/animals"
+)
+
+func main() {
+    // Создание зоопарка
+    zoo := animals.NewZoo("Московский зоопарк")
+    
+    // Добавление животных
+    fmt.Println("=== Добавление животных в зоопарк ===\n")
+    
+    dog := animals.Dog{Name: "Шарик", Breed: "Овчарка", Age: 5}
+    cat := animals.Cat{Name: "Мурка", Color: "Рыжая", Age: 3}
+    bird1 := animals.Bird{Name: "Кеша", CanFly: true, Age: 2}
+    bird2 := animals.Bird{Name: "Петя", CanFly: false, Age: 1}
+    
+    zoo.AddAnimal(dog)
+    zoo.AddAnimal(cat)
+    zoo.AddAnimal(bird1)
+    zoo.AddAnimal(bird2)
+    
+    // Вывод всех животных
+    zoo.ListAllAnimals()
+    
+    // Все животные издают звуки
+    zoo.MakeAllSounds()
+    
+    // Поиск животного
+    fmt.Println("\n=== Поиск животного ===")
+    reader := bufio.NewReader(os.Stdin)
+    fmt.Print("Введите имя животного для поиска: ")
+    name, _ := reader.ReadString('\n')
+    name = strings.TrimSpace(name)
+    
+    found := zoo.FindAnimal(name)
+    if found != nil {
+        fmt.Printf("Найдено: %s\n", found.GetInfo())
+    } else {
+        fmt.Printf("Животное '%s' не найдено\n", name)
+    }
+    
+    // Удаление животного
+    fmt.Println("\n=== Удаление животного ===")
+    fmt.Print("Введите имя животного для удаления: ")
+    removeName, _ := reader.ReadString('\n')
+    removeName = strings.TrimSpace(removeName)
+    zoo.RemoveAnimal(removeName)
+    
+    // Статистика
+    fmt.Printf("\n=== Статистика зоопарка ===\n")
+    fmt.Printf("Всего животных: %d\n", zoo.GetTotalAnimals())
+}</code></pre>
+                </div>
+            </div>
+
+            <!-- Этап 5 -->
+            <div class="lab-section">
+                <h2>🚀 Этап 5. Инициализация модуля и запуск</h2>
+                <div class="task-box">
+                    <p><span class="task-number">5</span> Создайте модуль и запустите программу:</p>
+                    <pre><code>cd zoo_project
+go mod init zoo_project
+go run main.go</code></pre>
+                </div>
+            </div>
+
+            <!-- Дополнительные задания -->
+            <div class="lab-section">
+                <h2>⭐ Дополнительные задания</h2>
+                <div class="task-box">
+                    <p><span class="task-number">+1</span> <strong>Статистика по зоопарку</strong></p>
+                    <p>Добавьте в структуру <code>Zoo</code> следующие методы:</p>
+                    <ul>
+                        <li><code>GetOldestAnimal() Animal</code> — самое старое животное</li>
+                        <li><code>GetYoungestAnimal() Animal</code> — самое молодое животное</li>
+                        <li><code>GetAverageAge() float64</code> — средний возраст</li>
+                        <li><code>GroupByType() map[string][]Animal</code> — группировка по типу</li>
+                    </ul>
+                </div>
+                <div class="task-box">
+                    <p><span class="task-number">+2</span> <strong>Сохранение в файл</strong></p>
+                    <p>Добавьте методы для сохранения и загрузки данных зоопарка в файл:</p>
+                    <ul>
+                        <li><code>SaveToFile(filename string) error</code></li>
+                        <li><code>LoadZooFromFile(filename string) (*Zoo, error)</code></li>
+                    </ul>
+                    <p>Используйте <code>encoding/json</code> для сериализации данных.</p>
+                </div>
+                <div class="task-box">
+                    <p><span class="task-number">+3</span> <strong>Новые типы животных</strong></p>
+                    <p>Добавьте в проект один или несколько новых типов животных: <code>Fish</code>, <code>Snake</code>, <code>Monkey</code>, <code>Elephant</code> или <code>Penguin</code>. Реализуйте для них все методы интерфейса <code>Animal</code>.</p>
+                </div>
+            </div>
+
+            <!-- Скриншот готового проекта -->
+            <div class="lab-section">
+                <h2>📸 Пример работы программы</h2>
+                <div class="screenshot-box">
+                    <i class="fas fa-terminal"></i>
+                    <p>📸 <strong>Скриншот работы программы</strong></p>
+                    <p>Запустите программу и сделайте скриншот результата</p>
+                    <small>Пример вывода программы приведён ниже</small>
+                </div>
+
+                <!-- Пример вывода программы -->
+                <div class="console-output">
+                    <strong>=== Добавление животных в зоопарк ===</strong><br>
+                    <br>
+                    Животное 'Шарик' добавлено в зоопарк 'Московский зоопарк'<br>
+                    Животное 'Мурка' добавлено в зоопарк 'Московский зоопарк'<br>
+                    Животное 'Кеша' добавлено в зоопарк 'Московский зоопарк'<br>
+                    Животное 'Петя' добавлено в зоопарк 'Московский зоопарк'<br>
+                    <br>
+                    === Животные в зоопарке 'Московский зоопарк' ===<br>
+                    1. Собака (Шарик), порода: Овчарка, возраст: 5 лет<br>
+                       Звук: Гав-гав!<br>
+                       Движение: бегает на четырёх лапах<br>
+                    <br>
+                    2. Кошка (Мурка), цвет: Рыжая, возраст: 3 года<br>
+                       Звук: Мяу-мяу!<br>
+                       Движение: крадётся бесшумно<br>
+                    <br>
+                    3. Птица (летающая) (Кеша), возраст: 2 лет, летает<br>
+                       Звук: Чирик-чирик!<br>
+                       Движение: летает по небу<br>
+                    <br>
+                    4. Птица (нелетающая) (Петя), возраст: 1 лет, не летает<br>
+                       Звук: Ку-ка-ре-ку!<br>
+                       Движение: ходит по земле<br>
+                    <br>
+                    === Все животные зоопарка издают звуки ===<br>
+                    Шарик: Гав-гав!<br>
+                    Мурка: Мяу-мяу!<br>
+                    Кеша: Чирик-чирик!<br>
+                    Петя: Ку-ка-ре-ку!<br>
+                    <br>
+                    === Поиск животного ===<br>
+                    Введите имя животного для поиска: Кеша<br>
+                    Найдено: Птица (летающая) (Кеша), возраст: 2 лет, летает<br>
+                    <br>
+                    === Удаление животного ===<br>
+                    Введите имя животного для удаления: Петя<br>
+                    Животное 'Петя' удалено из зоопарка<br>
+                    <br>
+                    === Статистика зоопарка ===<br>
+                    Всего животных: 3
+                </div>
+            </div>
+
+            <!-- Итог -->
+            <div class="goal-box">
+                <h3><i class="fas fa-trophy"></i> Итог лабораторной работы</h3>
+                <p>После выполнения лабораторной работы студент понимает концепцию методов в Go, умеет создавать методы как для структур, так и для любых пользовательских типов. Студент понимает разницу между получателем-значением и получателем-указателем и умеет выбирать правильный тип получателя в зависимости от задачи. Студент освоил интерфейсы как наборы методов, понимает ключевую особенность Go — неявную реализацию интерфейсов (duck typing), благодаря которой тип автоматически реализует интерфейс, если имеет все его методы. В рамках проекта «Зоопарк» студент создал иерархию животных с общим интерфейсом, реализовал полиморфное поведение, научился управлять коллекцией объектов через интерфейсный тип. Студент умеет добавлять новые типы животных без изменения существующего кода, что демонстрирует преимущества использования интерфейсов для создания расширяемых систем.</p>
+            </div>
+
+            <!-- Навигация -->
+            <div class="nav-buttons">
+                <a href="lab5.html" class="nav-btn prev">← Лабораторная работа №5</a>
+                <a href="lab7.html" class="nav-btn next">Лабораторная работа №7 →</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <a href="../index.html">GO COURSE</a>
+                    <p>Курс по языку программирования Go</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Навигация</h4>
+                    <a href="../lectures.html">Лекции</a>
+                    <a href="../labs.html">Лабораторные работы</a>
+                    <a href="../test.html">Итоговый тест</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Ресурсы</h4>
+                    <a href="https://go.dev/" target="_blank">Официальный сайт Go</a>
+                    <a href="https://go.dev/tour/" target="_blank">Tour of Go</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Контакты</h4>
+                    <a href="#">support@go-course.ru</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GO COURSE. Все материалы доступны для изучения.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        mobileMenuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
+    </script>
+
+</body>
+</html>

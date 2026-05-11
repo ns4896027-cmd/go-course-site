@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лекция 5 - Карты (maps) и структуры | Курс по Go</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F5F7FA;
+            color: #1a2a3a;
+            line-height: 1.6;
+        }
+
+        :root {
+            --primary: #007D9C;
+            --primary-dark: #005f73;
+            --primary-light: #e6f3f6;
+            --secondary: #00ADD8;
+            --text-dark: #1a2a3a;
+            --text-light: #5a6e7c;
+            --text-gray: #8a9ba8;
+            --bg-white: #FFFFFF;
+            --border: #E0E7EC;
+            --shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--primary);
+        }
+
+        .breadcrumbs {
+            padding-top: 100px;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .lecture-content {
+            background: var(--bg-white);
+            border-radius: 24px;
+            padding: 48px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow);
+        }
+
+        .lecture-title {
+            font-size: 36px;
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 24px;
+            color: var(--text-dark);
+            border-left: 4px solid var(--primary);
+            padding-left: 20px;
+        }
+
+        .lecture-section {
+            margin-bottom: 40px;
+        }
+
+        .lecture-section h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: var(--primary-dark);
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 8px;
+        }
+
+        .lecture-section h3 {
+            font-size: 22px;
+            margin: 20px 0 12px;
+            color: var(--text-dark);
+        }
+
+        .lecture-section p {
+            margin-bottom: 16px;
+            color: var(--text-light);
+        }
+
+        .info-box {
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+        }
+
+        .info-box i {
+            color: var(--primary);
+            margin-right: 10px;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .comparison-table th, .comparison-table td {
+            border: 1px solid var(--border);
+            padding: 12px;
+            text-align: left;
+        }
+
+        .comparison-table th {
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 600;
+        }
+
+        pre {
+            background: #1e2a3a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        code {
+            font-family: 'Courier New', monospace;
+            background: #f0f2f5;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: var(--primary-dark);
+        }
+
+        pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .nav-btn.prev:hover {
+            transform: translateX(-5px);
+        }
+
+        .nav-btn.next:hover {
+            transform: translateX(5px);
+        }
+
+        .footer {
+            background: #1a2a3a;
+            color: white;
+            padding: 60px 0 30px;
+            margin-top: 40px;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo a {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer-logo p {
+            margin-top: 16px;
+        }
+
+        .footer-links h4 {
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .footer-links a {
+            display: block;
+            color: #8a9ba8;
+            text-decoration: none;
+            margin-bottom: 12px;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--secondary);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            color: #8a9ba8;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 20px;
+                box-shadow: var(--shadow);
+            }
+            .nav-links.active { display: flex; }
+            .mobile-menu-btn { display: block; }
+            .lecture-content { padding: 24px; }
+            .lecture-title { font-size: 28px; }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+            .comparison-table { font-size: 14px; }
+            .comparison-table th, .comparison-table td { padding: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html" class="logo">GO COURSE</a>
+            <div class="mobile-menu-btn" id="mobileMenuBtn">
+                <i class="fas fa-bars"></i>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a href="../index.html">Главная</a>
+                <a href="../lectures.html">📚 Лекции</a>
+                <a href="../labs.html">💻 Лабораторные</a>
+                <a href="../test.html">📝 Тест</a>
+                <a href="../resources.html">🔗 Ресурсы</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="breadcrumbs">
+            <a href="../index.html">Главная</a> → <a href="../lectures.html">Лекции</a> → <span>Лекция 5</span>
+        </div>
+
+        <div class="lecture-content">
+            <h1 class="lecture-title">Лекция 5. Карты (maps) и структуры</h1>
+
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i> <strong>Длительность лекции:</strong> 60 минут<br>
+                <i class="fas fa-code"></i> <strong>Уровень:</strong> Средний<br>
+                <i class="fas fa-flask"></i> <strong>Темы:</strong> Карты (maps), операции с картами, итерация, структуры (structs)
+            </div>
+
+            <!-- Что такое карта -->
+            <div class="lecture-section">
+                <h2>🗺️ Что такое карта (map)?</h2>
+                <p><strong>Карта (map)</strong> — это ссылка на хеш-таблицу — структуру данных, где каждый элемент представляет пару <strong>«ключ-значение»</strong>. Каждый элемент имеет уникальный ключ, по которому можно получить значение.</p>
+                
+                <div class="info-box">
+                    <i class="fas fa-lightbulb"></i> <strong>Аналогия:</strong> Карта — это как телефонная книга. По имени (ключу) вы находите номер телефона (значение).
+                </div>
+            </div>
+
+            <!-- Создание карт -->
+            <div class="lecture-section">
+                <h2>📦 Создание карт</h2>
+                
+                <h3>Объявление (nil-карта)</h3>
+                <pre><code>var m map[string]int
+fmt.Println(m == nil)  // true
+// m["key"] = 42 // panic! нельзя добавлять в nil-карту</code></pre>
+
+                <h3>Создание с помощью make()</h3>
+                <pre><code>// Пустая карта (готова к использованию)
+scores := make(map[string]int)
+
+// Можно задать начальную емкость (оптимизация)
+phones := make(map[string]string, 100)
+
+scores["Анна"] = 95
+scores["Борис"] = 87</code></pre>
+
+                <h3>Литерал карты (инициализация при создании)</h3>
+                <pre><code>grades := map[string]int{
+    "Математика": 5,
+    "Физика":     4,
+    "Информатика": 5,
+}
+
+// Пустая карта через литерал
+empty := map[string]int{}</code></pre>
+
+                <h3>Сравнение способов создания</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr><th>Способ</th><th>Код</th><th>Можно добавлять</th><th>Когда использовать</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Объявление</td><td><code>var m map[K]V</code></td><td>❌ Нет</td><td>Только для чтения</td></tr>
+                        <tr><td>make</td><td><code>m := make(map[K]V)</code></td><td>✅ Да</td><td>Динамическое заполнение</td></tr>
+                        <tr><td>Литерал</td><td><code>m := map[K]V{}</code></td><td>✅ Да</td><td>Известные начальные данные</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Основные операции с картами -->
+            <div class="lecture-section">
+                <h2>⚙️ Основные операции с картами</h2>
+
+                <h3>Добавление и изменение элементов</h3>
+                <pre><code>students := make(map[int]string)
+
+// Добавление
+students[101] = "Анна Петрова"
+students[102] = "Борис Сидоров"
+
+// Изменение (тот же синтаксис)
+students[101] = "Анна Смирнова"  // перезапись</code></pre>
+
+                <h3>Чтение элементов</h3>
+                <pre><code>// Простое чтение (если ключа нет — zero value)
+name := students[101]
+unknown := students[999]  // "" (пустая строка)
+
+// Проверка существования ключа (comma ok idiom)
+value, exists := students[102]
+if exists {
+    fmt.Println("Найден:", value)
+} else {
+    fmt.Println("Не найден")
+}</code></pre>
+
+                <h3>Удаление элементов (delete)</h3>
+                <pre><code>students := map[int]string{
+    101: "Анна",
+    102: "Борис",
+    103: "Виктор",
+}
+
+delete(students, 102)  // удаляем Бориса
+fmt.Println(students)   // map[101:Анна 103:Виктор]
+
+// Удаление несуществующего ключа — безопасно
+delete(students, 999)  // нет паники</code></pre>
+
+                <h3>Длина и очистка карты</h3>
+                <pre><code>phones := map[string]string{"a": "123", "b": "456"}
+fmt.Println(len(phones))  // 2
+
+// Очистка (Go 1.21+)
+clear(phones)
+
+// Старый способ (до Go 1.21)
+for k := range phones {
+    delete(phones, k)
+}</code></pre>
+            </div>
+
+            <!-- Перебор карты -->
+            <div class="lecture-section">
+                <h2>🔄 Перебор карты (range)</h2>
+                
+                <h3>Базовый перебор</h3>
+                <pre><code>capitals := map[string]string{
+    "Россия":   "Москва",
+    "Франция":  "Париж",
+    "Германия": "Берлин",
+}
+
+for country, capital := range capitals {
+    fmt.Printf("%s → %s\n", country, capital)
+}</code></pre>
+
+                <div class="info-box">
+                    <i class="fas fa-exclamation-triangle"></i> <strong>Важно!</strong> Порядок перебора карты <strong>не гарантируется</strong> и может быть разным при каждом запуске!
+                </div>
+
+                <h3>Упорядоченный вывод</h3>
+                <pre><code>// Собираем ключи и сортируем
+countries := make([]string, 0, len(capitals))
+for country := range capitals {
+    countries = append(countries, country)
+}
+
+sort.Strings(countries)
+
+for _, country := range countries {
+    fmt.Printf("%s → %s\n", country, capitals[country])
+}</code></pre>
+
+                <h3>Перебор только ключей или только значений</h3>
+                <pre><code>// Только ключи
+for country := range capitals {
+    fmt.Println(country)
+}
+
+// Только значения
+for _, capital := range capitals {
+    fmt.Println(capital)
+}</code></pre>
+            </div>
+
+            <!-- Структуры -->
+            <div class="lecture-section">
+                <h2>🏗️ Структуры (struct)</h2>
+                <p>Структура — это составной тип данных, который объединяет несколько полей (переменных) в одну сущность.</p>
+
+                <h3>Определение структуры</h3>
+                <pre><code>type Person struct {
+    Name string
+    Age  int
+    City string
+}
+
+func main() {
+    // Создание экземпляра структуры
+    person1 := Person{
+        Name: "Анна",
+        Age:  25,
+        City: "Москва",
+    }
+    
+    person2 := Person{"Борис", 30, "СПб"}
+    
+    // Доступ к полям
+    fmt.Println(person1.Name)  // Анна
+    fmt.Println(person2.Age)   // 30
+    
+    // Изменение полей
+    person1.City = "Санкт-Петербург"
+}</code></pre>
+
+                <h3>Вложенные структуры</h3>
+                <pre><code>type Address struct {
+    City    string
+    Street  string
+    ZipCode string
+}
+
+type Student struct {
+    Name    string
+    Age     int
+    Address Address
+}
+
+func main() {
+    student := Student{
+        Name: "Анна",
+        Age:  20,
+        Address: Address{
+            City:    "Москва",
+            Street:  "Тверская",
+            ZipCode: "101000",
+        },
+    }
+    
+    fmt.Println(student.Address.City)  // Москва
+}</code></pre>
+            </div>
+
+            <!-- Практические примеры -->
+            <div class="lecture-section">
+                <h2>💡 Практические примеры</h2>
+
+                <h3>Пример 1. Счётчик слов</h3>
+                <pre><code>func wordCount(text string) map[string]int {
+    words := strings.Fields(text)
+    count := make(map[string]int)
+    
+    for _, word := range words {
+        word = strings.ToLower(strings.Trim(word, ".,!?;:"))
+        count[word]++
+    }
+    return count
+}
+
+func main() {
+    text := "To be or not to be, that is the question. To be!"
+    stats := wordCount(text)
+    
+    for word, cnt := range stats {
+        fmt.Printf("%s: %d\n", word, cnt)
+    }
+}</code></pre>
+
+                <h3>Пример 2. Группировка данных по структурам</h3>
+                <pre><code>type Person struct {
+    Name string
+    Age  int
+    City string
+}
+
+func groupByCity(people []Person) map[string][]Person {
+    groups := make(map[string][]Person)
+    
+    for _, p := range people {
+        groups[p.City] = append(groups[p.City], p)
+    }
+    return groups
+}
+
+func main() {
+    people := []Person{
+        {"Анна", 25, "Москва"},
+        {"Борис", 30, "СПб"},
+        {"Виктор", 28, "Москва"},
+        {"Галина", 35, "СПб"},
+        {"Дмитрий", 22, "Казань"},
+    }
+    
+    byCity := groupByCity(people)
+    
+    for city, persons := range byCity {
+        fmt.Printf("Город %s:\n", city)
+        for _, p := range persons {
+            fmt.Printf("  - %s (%d лет)\n", p.Name, p.Age)
+        }
+    }
+}</code></pre>
+            </div>
+
+            <!-- Контрольные вопросы -->
+            <div class="lecture-section">
+                <h2>❓ Задания для самопроверки</h2>
+                <div class="info-box">
+                    <i class="fas fa-tasks"></i> <strong>Задание 1:</strong> Создайте карту, которая хранит названия месяцев на русском и английском. Выведите все пары.
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-tasks"></i> <strong>Задание 2:</strong> Напишите функцию <code>invertMap(map[string]int) map[int][]string</code>, которая меняет местами ключи и значения.
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-tasks"></i> <strong>Задание 3:</strong> Реализуйте функцию, которая находит наиболее часто встречающееся слово в тексте.
+                </div>
+                <div class="info-box">
+                    <i class="fas fa-tasks"></i> <strong>Задание 4:</strong> Создайте структуру <code>Book</code> с полями <code>Title</code>, <code>Author</code>, <code>Year</code>, <code>Pages</code>.
+                </div>
+            </div>
+
+            <!-- Навигация между лекциями -->
+            <div class="nav-buttons">
+                <a href="lecture4.html" class="nav-btn prev">← Назад к лекции 4</a>
+                <a href="lecture6.html" class="nav-btn next">Лекция 6 → Методы и интерфейсы</a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <a href="../index.html">GO COURSE</a>
+                    <p>Курс по языку программирования Go</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Навигация</h4>
+                    <a href="../lectures.html">Лекции</a>
+                    <a href="../labs.html">Лабораторные работы</a>
+                    <a href="../test.html">Итоговый тест</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Ресурсы</h4>
+                    <a href="https://go.dev/" target="_blank">Официальный сайт Go</a>
+                    <a href="https://go.dev/tour/" target="_blank">Tour of Go</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Контакты</h4>
+                    <a href="#">support@go-course.ru</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 GO COURSE. Все материалы доступны для изучения.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        mobileMenuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
+    </script>
+
+</body>
+</html>
