@@ -294,7 +294,6 @@
             box-shadow: 0 0 0 3px var(--primary-light);
         }
 
-        /* Стили для вопроса на сопоставление */
         .match-lists {
             display: flex;
             gap: 40px;
@@ -340,10 +339,6 @@
             border-color: var(--success);
             opacity: 0.7;
             cursor: default;
-        }
-
-        .match-item.matched:hover {
-            transform: none;
         }
 
         .match-pairs {
@@ -645,15 +640,15 @@
             { text: "Какой девиз лучше всего описывает философию Go?", type: "single", options: ["Write once, run anywhere", "Less is exponentially more", "There's more than one way to do it", "Simplicity is the ultimate sophistication"], correct: ["Less is exponentially more"] },
             // Вопрос 4 - выбор одного
             { text: "Какой тип данных в Go является синонимом для uint8?", type: "single", options: ["rune", "int", "byte", "uint"], correct: ["byte"] },
-            // Вопрос 5 - множественный выбор (НОВЫЙ)
-            { text: "Какие из перечисленных языковых конструкций есть в Go?", type: "multiple", options: ["Классы и наследование", "Горутины", "Исключения (try-catch)", "Интерфейсы с неявной реализацией", "Указатели"], correct: ["Горутины", "Интерфейсы с неявной реализацией", "Указатели"] },
-            // Вопрос 6 - множественный выбор (НОВЫЙ)
-            { text: "Какие встроенные функции есть в Go?", type: "multiple", options: ["make()", "new()", "append()", "delete()", "sort()"], correct: ["make()", "new()", "append()", "delete()"] },
-            // Вопрос 7 - сопоставление (НОВЫЙ)
+            // Вопрос 5 - множественный выбор
+            { text: "Какие из перечисленных языковых конструкций есть в Go? (Выберите все подходящие)", type: "multiple", options: ["Классы и наследование", "Горутины", "Исключения (try-catch)", "Интерфейсы с неявной реализацией", "Указатели"], correct: ["Горутины", "Интерфейсы с неявной реализацией", "Указатели"] },
+            // Вопрос 6 - множественный выбор
+            { text: "Какие встроенные функции есть в Go? (Выберите все подходящие)", type: "multiple", options: ["make()", "new()", "append()", "delete()", "sort()"], correct: ["make()", "new()", "append()", "delete()"] },
+            // Вопрос 7 - сопоставление
             { text: "Сопоставьте тип данных с его размером в памяти:", type: "match", 
               leftItems: ["int8", "int16", "int32", "int64", "byte"],
               rightItems: ["1 байт", "2 байта", "4 байта", "8 байт", "1 байт"],
-              correct: [
+              correctPairs: [
                 {left: "int8", right: "1 байт"},
                 {left: "int16", right: "2 байта"},
                 {left: "int32", right: "4 байта"},
@@ -715,11 +710,9 @@
         // Переменные состояния
         let questions = [];
         let userAnswers = {};
-        let matches = {}; // для хранения сопоставлений (left -> right)
         let currentIndex = 0;
         let timerInterval;
         let timeLeft = 50 * 60;
-        let rightItemsOriginal = []; // для хранения правых элементов в сопоставлении
 
         // DOM элементы
         const startScreen = document.getElementById('startScreen');
@@ -733,6 +726,7 @@
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
 
+        // Функция перемешивания
         function shuffleArray(arr) {
             for (let i = arr.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -741,10 +735,52 @@
             return arr;
         }
 
+        // Проверка ответа на вопрос с множественным выбором
+        function isMultipleChoiceCorrect(userAnswer, correctArray) {
+            if (!Array.isArray(userAnswer)) return false;
+            if (userAnswer.length !== correctArray.length) return false;
+            const sortedUser = [...userAnswer].sort();
+            const sortedCorrect = [...correctArray].sort();
+            return JSON.stringify(sortedUser) === JSON.stringify(sortedCorrect);
+        }
+
+        // Проверка ответа на сопоставление
+        function isMatchCorrect(userMatches, correctPairs) {
+            if (!userMatches || typeof userMatches !== 'object') return false;
+            for (const pair of correctPairs) {
+                if (userMatches[pair.left] !== pair.right) return false;
+            }
+            return Object.keys(userMatches).length === correctPairs.length;
+        }
+
+        // Подсчёт правильных ответов
+        function calculateScore() {
+            let correctCount = 0;
+            questions.forEach((q, idx) => {
+                const userAnswer = userAnswers[idx];
+                if (userAnswer === undefined || userAnswer === null || userAnswer === '') return;
+                
+                if (q.type === 'single') {
+                    if (userAnswer === q.correct[0]) correctCount++;
+                } else if (q.type === 'multiple') {
+                    if (isMultipleChoiceCorrect(userAnswer, q.correct)) correctCount++;
+                } else if (q.type === 'match') {
+                    if (isMatchCorrect(userAnswer, q.correctPairs)) correctCount++;
+                } else if (q.type === 'open') {
+                    const normalizedUser = String(userAnswer).toLowerCase().trim();
+                    const isCorrect = q.correct.some(c => 
+                        normalizedUser === c.toLowerCase().trim() || 
+                        (c.includes(' ') && normalizedUser.includes(c.split(' ')[0]))
+                    );
+                    if (isCorrect) correctCount++;
+                }
+            });
+            return correctCount;
+        }
+
         function initTest() {
             questions = shuffleArray([...originalQuestions]);
             userAnswers = {};
-            matches = {};
             currentIndex = 0;
             timeLeft = 50 * 60;
             updateTimerDisplay();
@@ -758,20 +794,20 @@
         function renderMatchQuestion(q) {
             const leftItems = q.leftItems;
             const rightItems = [...q.rightItems];
-            rightItemsOriginal = [...rightItems];
+            const savedMatches = userAnswers[currentIndex] || {};
             
-            // Перемешиваем правые элементы для сложности
+            // Перемешиваем правые элементы
             const shuffledRight = shuffleArray([...rightItems]);
             
             let html = `
                 <div class="match-lists">
                     <div class="match-left">
-                        <h4>📌 Ключи (типы данных)</h4>
+                        <h4>📌 Тип данных</h4>
                         <div id="leftList">
             `;
             
             leftItems.forEach((item, idx) => {
-                const isMatched = matches[item];
+                const isMatched = savedMatches[item];
                 html += `
                     <div class="match-item ${isMatched ? 'matched' : ''}" data-left="${item}" data-left-idx="${idx}">
                         <strong>${item}</strong>
@@ -783,12 +819,12 @@
                         </div>
                     </div>
                     <div class="match-right">
-                        <h4>📌 Значения (размеры)</h4>
+                        <h4>📌 Размер</h4>
                         <div id="rightList">
             `;
             
             shuffledRight.forEach((item, idx) => {
-                const isUsed = Object.values(matches).includes(item);
+                const isUsed = Object.values(savedMatches).includes(item);
                 html += `
                     <div class="match-item ${isUsed ? 'matched' : ''}" data-right="${item}" data-right-idx="${idx}">
                         ${item}
@@ -805,10 +841,10 @@
                     <div id="matchPairsList">
             `;
             
-            if (Object.keys(matches).length === 0) {
+            if (Object.keys(savedMatches).length === 0) {
                 html += `<p style="color: #8a9ba8;">Пока нет сопоставлений. Нажмите на элемент слева, затем на элемент справа.</p>`;
             } else {
-                for (const [left, right] of Object.entries(matches)) {
+                for (const [left, right] of Object.entries(savedMatches)) {
                     html += `<div class="pair"><span class="pair-key">${left}</span> → <span class="pair-value">${right}</span></div>`;
                 }
             }
@@ -820,7 +856,7 @@
             
             optionsContainer.innerHTML = html;
             
-            // Добавляем обработчики для сопоставления
+            // Обработчики для сопоставления
             let selectedLeft = null;
             
             document.querySelectorAll('.match-left .match-item').forEach(el => {
@@ -837,43 +873,4 @@
                     if (el.classList.contains('matched')) return;
                     const rightValue = el.getAttribute('data-right');
                     if (selectedLeft) {
-                        // Сохраняем сопоставление
-                        matches[selectedLeft] = rightValue;
-                        userAnswers[currentIndex] = matches;
-                        // Обновляем отображение
-                        renderCurrentQuestion();
-                    } else {
-                        alert('Сначала выберите элемент из левого столбца!');
-                    }
-                });
-            });
-        }
-
-        function renderCurrentQuestion() {
-            const q = questions[currentIndex];
-            questionCounter.innerText = `Вопрос ${currentIndex + 1} из ${questions.length}`;
-            
-            let text = q.text;
-            text = text.replace(/```go/g, '<div class="question-code"><pre><code class="language-go">');
-            text = text.replace(/```/g, '</code></pre></div>');
-            questionText.innerHTML = text;
-            
-            if (q.type === 'match') {
-                questionNote.style.display = 'block';
-                questionNote.innerHTML = '💡 Инструкция: Сначала нажмите на элемент из левого столбца, затем на элемент из правого столбца, чтобы сопоставить их.';
-                renderMatchQuestion(q);
-                return;
-            } else {
-                questionNote.style.display = 'none';
-            }
-            
-            optionsContainer.innerHTML = '';
-            
-            if (q.type === 'single') {
-                q.options.forEach(opt => {
-                    const optionDiv = document.createElement('div');
-                    optionDiv.className = 'option';
-                    const isSelected = userAnswers[currentIndex] === opt;
-                    if (isSelected) optionDiv.classList.add('selected');
-                    
-                    const inputId
+                        const newMatches = { ...(userAnswers[currentIndex] ||
