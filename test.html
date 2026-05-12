@@ -873,4 +873,210 @@
                     if (el.classList.contains('matched')) return;
                     const rightValue = el.getAttribute('data-right');
                     if (selectedLeft) {
-                        const newMatches = { ...(userAnswers[currentIndex] ||
+                        const newMatches = { ...(userAnswers[currentIndex] || {}) };
+                        newMatches[selectedLeft] = rightValue;
+                        userAnswers[currentIndex] = newMatches;
+                        renderCurrentQuestion();
+                    } else {
+                        alert('Сначала выберите элемент из левого столбца!');
+                    }
+                });
+            });
+        }
+
+        // Рендер обычных вопросов
+        function renderNormalQuestion(q) {
+            if (q.type === 'single') {
+                q.options.forEach(opt => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'option';
+                    const isSelected = userAnswers[currentIndex] === opt;
+                    if (isSelected) optionDiv.classList.add('selected');
+                    
+                    const inputId = `opt_${currentIndex}_${opt.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                    optionDiv.innerHTML = `
+                        <input type="radio" name="question" value="${opt.replace(/"/g, '&quot;')}" id="${inputId}" ${isSelected ? 'checked' : ''}>
+                        <label for="${inputId}">${opt}</label>
+                    `;
+                    const radio = optionDiv.querySelector('input');
+                    radio.addEventListener('change', (e) => {
+                        if (e.target.checked) {
+                            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+                            optionDiv.classList.add('selected');
+                            userAnswers[currentIndex] = opt;
+                        }
+                    });
+                    optionsContainer.appendChild(optionDiv);
+                });
+            } 
+            else if (q.type === 'multiple') {
+                const savedAnswers = userAnswers[currentIndex] || [];
+                q.options.forEach(opt => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'option';
+                    const isChecked = savedAnswers.includes(opt);
+                    if (isChecked) optionDiv.classList.add('selected');
+                    
+                    const inputId = `opt_${currentIndex}_${opt.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                    optionDiv.innerHTML = `
+                        <input type="checkbox" name="question" value="${opt.replace(/"/g, '&quot;')}" id="${inputId}" ${isChecked ? 'checked' : ''}>
+                        <label for="${inputId}">${opt}</label>
+                    `;
+                    const checkbox = optionDiv.querySelector('input');
+                    checkbox.addEventListener('change', (e) => {
+                        let currentAnswers = userAnswers[currentIndex] || [];
+                        if (e.target.checked) {
+                            currentAnswers.push(opt);
+                            optionDiv.classList.add('selected');
+                        } else {
+                            currentAnswers = currentAnswers.filter(a => a !== opt);
+                            optionDiv.classList.remove('selected');
+                        }
+                        userAnswers[currentIndex] = currentAnswers;
+                    });
+                    optionsContainer.appendChild(optionDiv);
+                });
+            }
+            else if (q.type === 'open') {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.className = 'open-answer';
+                input.placeholder = 'Введите ответ...';
+                input.value = userAnswers[currentIndex] || '';
+                input.addEventListener('input', (e) => {
+                    userAnswers[currentIndex] = e.target.value.trim();
+                });
+                optionsContainer.appendChild(input);
+            }
+        }
+
+        function renderCurrentQuestion() {
+            const q = questions[currentIndex];
+            questionCounter.innerText = `Вопрос ${currentIndex + 1} из ${questions.length}`;
+            
+            let text = q.text;
+            text = text.replace(/```go/g, '<div class="question-code"><pre><code class="language-go">');
+            text = text.replace(/```/g, '</code></pre></div>');
+            questionText.innerHTML = text;
+            
+            optionsContainer.innerHTML = '';
+            
+            if (q.type === 'match') {
+                questionNote.style.display = 'block';
+                questionNote.innerHTML = '💡 Инструкция: Сначала нажмите на элемент из левого столбца, затем на элемент из правого столбца, чтобы сопоставить их.';
+                renderMatchQuestion(q);
+            } else {
+                questionNote.style.display = 'none';
+                renderNormalQuestion(q);
+            }
+        }
+
+        function updateButtonStates() {
+            if (currentIndex === 0) {
+                prevBtn.disabled = true;
+                prevBtn.style.opacity = '0.5';
+            } else {
+                prevBtn.disabled = false;
+                prevBtn.style.opacity = '1';
+            }
+            
+            if (currentIndex === questions.length - 1) {
+                nextBtn.innerText = '✅ Завершить';
+            } else {
+                nextBtn.innerText = 'Далее →';
+            }
+        }
+
+        function nextQuestion() {
+            if (currentIndex < questions.length - 1) {
+                currentIndex++;
+                renderCurrentQuestion();
+                updateButtonStates();
+            } else {
+                finishTest();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderCurrentQuestion();
+                updateButtonStates();
+            }
+        }
+
+        function finishTest() {
+            if (timerInterval) clearInterval(timerInterval);
+            
+            const correctCount = calculateScore();
+            const total = questions.length;
+            const percentage = Math.round((correctCount / total) * 100);
+            
+            let level = '';
+            if (percentage >= 90) level = '🏆 Эксперт! Вы отлично знаете Go!';
+            else if (percentage >= 75) level = '🎓 Продвинутый уровень. Хороший результат!';
+            else if (percentage >= 60) level = '📚 Средний уровень. Есть над чем поработать.';
+            else if (percentage >= 40) level = '📖 Начальный уровень. Рекомендуем повторить материал.';
+            else level = '📝 Требуется изучение. Пройдите курс заново.';
+            
+            document.getElementById('resultScore').innerText = `${percentage}%`;
+            document.getElementById('resultLevel').innerHTML = level;
+            document.getElementById('correctCount').innerText = correctCount;
+            document.getElementById('totalCount').innerText = total;
+            
+            hideQuestionCard();
+            showResult();
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    finishTest();
+                } else {
+                    timeLeft--;
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        }
+        
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerEl.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function showStartScreen() { startScreen.style.display = 'block'; questionCard.style.display = 'none'; resultCard.style.display = 'none'; }
+        function showQuestionCard() { startScreen.style.display = 'none'; questionCard.style.display = 'block'; resultCard.style.display = 'none'; }
+        function showResult() { startScreen.style.display = 'none'; questionCard.style.display = 'none'; resultCard.style.display = 'block'; }
+        function hideResult() { resultCard.style.display = 'none'; }
+        function hideQuestionCard() { questionCard.style.display = 'none'; }
+        
+        function restartTest() {
+            if (timerInterval) clearInterval(timerInterval);
+            initTest();
+            startTimer();
+        }
+        
+        // Обработчики событий
+        document.getElementById('startBtn').addEventListener('click', () => {
+            initTest();
+            startTimer();
+        });
+        
+        document.getElementById('restartBtn').addEventListener('click', () => {
+            restartTest();
+        });
+        
+        prevBtn.addEventListener('click', prevQuestion);
+        nextBtn.addEventListener('click', nextQuestion);
+        
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', () => navLinks.classList.toggle('active'));
+        }
+    </script>
+</body>
+</html>
